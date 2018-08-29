@@ -3,12 +3,27 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
+import okio.ByteString;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -17,8 +32,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flyover.kube.tools.connector.model.GenericKubeItemsModel;
 import com.flyover.kube.tools.connector.model.KubeModel;
 import com.flyover.kube.tools.connector.model.PathsModel;
+import com.flyover.kube.tools.connector.model.PodModel;
 import com.flyover.kube.tools.connector.model.ResourceListModel;
 import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
@@ -30,6 +49,7 @@ import com.flyover.kube.tools.connector.model.VersionModel;
 public class Kubernetes {
 	
 	private ExecutorService pool = Executors.newFixedThreadPool(4);
+	private OkHttpClient client = new OkHttpClient();
 	private KubernetesConfig config;
 	private RestTemplate restTemplate;
 
@@ -54,9 +74,13 @@ public class Kubernetes {
 		
 		pool.shutdown();
 		
+		ExecutorService clientPool = client.dispatcher().executorService();
+		clientPool.shutdown();
+		
 		try {
 		
 			pool.awaitTermination(60, TimeUnit.SECONDS);
+			clientPool.awaitTermination(60, TimeUnit.SECONDS);
 			
 		} catch (InterruptedException e) {
 			// log this
@@ -95,6 +119,12 @@ public class Kubernetes {
 		ns.metadata().setName(name);
 		
 		return ns;
+		
+	}
+	
+	public Volume volume(String namespace, String name, String alias) {
+		
+		return config.getStorageProvider().build(this, namespace, name, alias);
 		
 	}
 	
@@ -139,6 +169,8 @@ public class Kubernetes {
 	}
 	
 	public <T extends KubeModel> T find(T model) {
+
+		System.out.println("executing find operation");
 		
 		return find(uri(model, resource(model)), model);
 		
@@ -149,36 +181,145 @@ public class Kubernetes {
 		delete(uri(model, resource(model)), model);
 		
 	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends KubeModel> List<T> list(T model, Map<String, String> selectors) {
+		
+		System.out.println("executing list operation");
+		
+		return (List<T>) list(model.getClass(), uri(model, resource(model), true), selectors);
+		
+	}
+	
+	public String exec(PodModel model, String command) {
+		
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUri(uri(model, resource(model)))
+				.path("/exec")
+				.queryParam("command", command)
+				.queryParam("stderr", true)
+				.queryParam("stdout", true);
+		
+		Request request = new Request.Builder()
+			.url(builder.build().toUri().toString())
+			.header("X-Stream-Protocol-Version", "v4.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "v3.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "v2.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "v.channel.k8s.io")
+				.build();
+		
+		CompletableFuture<String> promise = new CompletableFuture<>();
+		
+		WebSocketListener listener = new WebSocketListener() {
+			
+			private ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+			@Override
+			public void onMessage(WebSocket webSocket, String text) {
+				
+				try {
+					out.write(text.getBytes());
+				} catch (IOException e) {
+					promise.completeExceptionally(e);
+				}
+				
+			}
+
+			@Override
+			public void onMessage(WebSocket webSocket, ByteString bytes) {
+				try {
+					out.write(bytes.toByteArray());
+				} catch (IOException e) {
+					promise.completeExceptionally(e);
+				}
+			}
+
+			@Override
+			public void onClosing(WebSocket webSocket, int code, String reason) {
+				promise.complete(new String(out.toByteArray()));
+			}
+
+			@Override
+			public void onClosed(WebSocket webSocket, int code, String reason) {
+				promise.complete(new String(out.toByteArray()));
+			}
+
+			@Override
+			public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+				promise.completeExceptionally(t);
+			}
+			
+		};
+		
+		WebSocket socket = null;
+		
+		try {
+			
+			socket = client.newWebSocket(request, listener);
+			
+			return promise.get();
+			
+		} catch (Exception e) {
+			
+			throw new RuntimeException("Failed during exec call.", e);
+			
+		} finally {
+			
+			if(socket != null) {
+				socket.close(1000, null);
+			}
+			
+		}
+		
+	}
 
 	private <T extends KubeModel> URI uri(T model, ResourceRef ref) {
+		
+		return uri(model, ref, false);
+		
+	}
+	
+	private <T extends KubeModel> URI uri(T model, ResourceRef ref, boolean list) {
 		
 		URI uri = null;
 		
 		if(ref.getResource().isNamespaced()) {
 			
-			uri = UriComponentsBuilder
+			UriComponentsBuilder builder = UriComponentsBuilder
     			.fromHttpUrl(config.getEndpoint())
     			.path(ref.getPath())
     			.path("/namespaces/")
     			.path(model.getMetadata().getNamespace())
     			.path("/")
-    			.path(ref.getResource().getName())
-    			.path("/")
-    			.path(model.getMetadata().getName())
-    			.build()
-    				.toUri();
+    			.path(ref.getResource().getName());
+			
+			if(!list) {
+			
+				builder = builder
+					.path("/")
+					.path(model.getMetadata().getName());
+		    			
+			}
+    			
+			uri = builder.build().toUri();
 			
 		} else {
 			
-			uri = UriComponentsBuilder
-    			.fromHttpUrl(config.getEndpoint())
-    			.path(ref.getPath())
-    			.path("/")
-    			.path(ref.getResource().getName())
-    			.path("/")
-    			.path(model.getMetadata().getName())
-    			.build()
-    				.toUri();
+			UriComponentsBuilder builder = UriComponentsBuilder
+				.fromHttpUrl(config.getEndpoint())
+				.path(ref.getPath())
+				.path("/")
+				.path(ref.getResource().getName());
+			
+			if(!list) {
+				
+				builder = builder
+					.path("/")
+					.path(model.getMetadata().getName());
+		    			
+			}
+    			
+			uri = builder.build().toUri();
 			
 		}
 		
@@ -196,6 +337,15 @@ public class Kubernetes {
 	private <T extends KubeModel> T create(URI uri, T model) {
 
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
+		
+		try {
+			
+			System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return (T) restTemplate.postForObject(uri, model, model.getClass());
 		
@@ -239,6 +389,39 @@ public class Kubernetes {
 		
 	}
 	
+	private <T extends KubeModel> List<T> list(Class<T> type, URI uri, Map<String, String> selectors) {
+
+		try {
+			
+			String labelSelector = selectors.entrySet().stream()
+				.map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+				.collect(Collectors.joining(","));
+			
+			URI uriFull = UriComponentsBuilder.fromUri(uri)
+				.queryParam("labelSelector", labelSelector)
+					.build().toUri();
+			
+			GenericKubeItemsModel items = restTemplate
+					.getForObject(uriFull, GenericKubeItemsModel.class);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			return items.getItems().stream()
+				.map(i -> mapper.convertValue(i, type))
+					.collect(Collectors.toList());
+			
+		} catch (HttpClientErrorException e) {
+			
+			if(HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
+				return null;
+			}
+			
+			throw e;
+			
+		}
+		
+	}
+	
 	private <T extends KubeModel> void delete(URI uri, T model) {
 
 		try {
@@ -261,23 +444,40 @@ public class Kubernetes {
 		
 		// get the api path for the component
 		
-		URI uri = UriComponentsBuilder
-			.fromHttpUrl(config.getEndpoint()).build().toUri();
+//		URI uri = UriComponentsBuilder
+//			.fromHttpUrl(config.getEndpoint()).build().toUri();
+//		
+//		PathsModel res = restTemplate.getForObject(uri, PathsModel.class); 
 		
-		PathsModel res = restTemplate.getForObject(uri, PathsModel.class); 
+		InputStream input = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream("kubernetes.paths.json");
 		
-		return res.getPaths().stream()
-			.filter(p -> p.contains(model.getApiVersion()))
-			.findFirst()
-				.orElseThrow(() -> new RuntimeException(
-					String.format("could not determine api path for compoent with apiVersion %s and kind", 
-							model.getApiVersion(), model.getKind())));
+		try {
+			
+			PathsModel res = new ObjectMapper().readValue(input, PathsModel.class);
+			
+			return res.getPaths().stream()
+				.filter(p -> p.contains(model.getApiVersion()))
+				.findFirst()
+					.orElseThrow(() -> new RuntimeException(
+						String.format("could not determine api path for compoent with apiVersion %s and kind", 
+								model.getApiVersion(), model.getKind())));
+			
+		} catch (IOException e) {
+			throw new RuntimeException("failed to load paths resource", e);
+		}
 		
 	}
 	
+	private static final Map<Class<? extends KubeModel>, ResourceModel> RESOURCE_MODEL_CACHE = new LinkedHashMap<>();
+	
 	private ResourceRef resource(KubeModel model) {
-		
+
 		String path = path(model);
+		
+		if(RESOURCE_MODEL_CACHE.containsKey(model.getClass())) {
+			return new ResourceRef(path, RESOURCE_MODEL_CACHE.get(model.getClass()));
+		}
 		
 		URI uri = UriComponentsBuilder
 			.fromHttpUrl(config.getEndpoint())
@@ -293,6 +493,8 @@ public class Kubernetes {
 			.orElseThrow(() -> new RuntimeException(
 					String.format("could not find api resource for compoent with apiVersion %s and kind %s", 
 							model.getApiVersion(), model.getKind())));
+		
+		RESOURCE_MODEL_CACHE.put(model.getClass(), resource);
 		
 		return new ResourceRef(path, resource);
 		

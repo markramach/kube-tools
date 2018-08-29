@@ -14,10 +14,19 @@ import java.util.Map;
  */
 public class ServiceSpecModel extends Model {
 	
+	private String clusterIP;
 	private String type = "ClusterIP";
 	private List<PortTargetModel> ports = new LinkedList<>();
 	private Map<String, String> selector = new LinkedHashMap<>();
 	
+	public String getClusterIP() {
+		return clusterIP;
+	}
+
+	public void setClusterIP(String clusterIP) {
+		this.clusterIP = clusterIP;
+	}
+
 	public String getType() {
 		return type;
 	}

@@ -14,18 +14,23 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
 
 import com.flyover.kube.tools.connector.model.DeploymentModel;
+import com.flyover.kube.tools.connector.model.GenericKubeItemsModel;
 import com.flyover.kube.tools.connector.model.NamespaceModel;
 import com.flyover.kube.tools.connector.model.PathsModel;
+import com.flyover.kube.tools.connector.model.PodModel;
 
 /**
  * @author mramach
@@ -35,10 +40,25 @@ public class DeploymentTest {
 	
 	private static final String NAMESPACE = "test";
 
+	private Kubernetes kube;
+	
+	@Before
+	public void before() {
+	
+		KubernetesConfig config = new KubernetesConfig();
+		config.setAuthenticator(new KubernetesAuthenticator() {
+			
+			@Override
+			public void configure(RestTemplate restTemplate) {}
+			
+		});
+		
+		this.kube = new Kubernetes(config);
+		
+	}
+	
 	@Test
 	public void testCreateOrUpdate_NotFound() {
-		
-		Kubernetes kube = new Kubernetes();
 		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
@@ -91,8 +111,6 @@ public class DeploymentTest {
 	
 	@Test
 	public void testCreateOrUpdate_Found() {
-		
-		Kubernetes kube = new Kubernetes();
 		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
@@ -150,8 +168,6 @@ public class DeploymentTest {
 	@Test
 	public void testReady() {
 		
-		Kubernetes kube = new Kubernetes();
-		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
 		
@@ -188,8 +204,6 @@ public class DeploymentTest {
 	
 	@Test(expected = RuntimeException.class)
 	public void testReady_Timeout() {
-		
-		Kubernetes kube = new Kubernetes();
 		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
@@ -229,8 +243,6 @@ public class DeploymentTest {
 	
 	@Test(expected = RuntimeException.class)
 	public void testReady_ProcessingError() {
-		
-		Kubernetes kube = new Kubernetes();
 		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
@@ -274,8 +286,6 @@ public class DeploymentTest {
 	
 	@Test
 	public void testExpose() {
-		
-		Kubernetes kube = new Kubernetes();
 		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
@@ -345,8 +355,6 @@ public class DeploymentTest {
 	@Test
 	public void testDelete() {
 		
-		Kubernetes kube = new Kubernetes();
-		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
 		
@@ -392,8 +400,6 @@ public class DeploymentTest {
 	@Test
 	public void testDelete_NotFound() {
 		
-		Kubernetes kube = new Kubernetes();
-		
 		MockRestServiceServer mockServer = 
 			MockRestServiceServer.createServer(kube.getRestTemplate());
 		
@@ -436,6 +442,67 @@ public class DeploymentTest {
 		
 	}
 	
+	@Test
+	public void testPods() {
+		
+		MockRestServiceServer mockServer = 
+			MockRestServiceServer.createServer(kube.getRestTemplate());
+		
+		setupNamespace(mockServer);
+		
+		DeploymentModel d = new DeploymentModel();
+		d.getMetadata().setNamespace(NAMESPACE);
+		d.getMetadata().setName("nginx");
+		d.getSpec().getSelector().getMatchLabels().put("key", "foo");
+		
+		PodModel p = new PodModel();
+		p.getMetadata().setNamespace(NAMESPACE);
+		p.getMetadata().setName("nginx-pod");
+		
+		GenericKubeItemsModel list = new GenericKubeItemsModel();
+		list.setItems(Arrays.asList(p));
+		
+		mockServer
+			.expect(manyTimes(), requestTo(
+					localhost().path("/apis/extensions/v1beta1/namespaces/{namespace}/deployments/{name}")
+						.buildAndExpand(NAMESPACE, "nginx").toUri()))
+			.andExpect(method(GET))
+			.andRespond((res) -> {
+				
+				MockClientHttpResponse response = new MockClientHttpResponse(write(d), HttpStatus.OK);
+				response.getHeaders().put("Content-Type", Arrays.asList(APPLICATION_JSON_VALUE));
+				
+				return response;
+				
+			});
+		
+		mockServer
+			.expect(manyTimes(), requestTo(
+					localhost().path("/api/v1/namespaces/{namespace}/pods")
+						.queryParam("labelSelector", "key=foo")
+						.buildAndExpand(NAMESPACE, "nginx").toUri()))
+			.andExpect(method(GET))
+			.andRespond((res) -> {
+				
+				MockClientHttpResponse response = new MockClientHttpResponse(write(list), HttpStatus.OK);
+				response.getHeaders().put("Content-Type", Arrays.asList(APPLICATION_JSON_VALUE));
+				
+				return response;
+				
+			});
+		
+		Deployment deployment = kube.namespace(NAMESPACE).findOrCreate()
+			.deployment("nginx").find();
+		
+		List<Pod> pods = deployment.pods();
+
+		mockServer.verify();
+		
+		assertNotNull("The result is null.", pods);
+		assertFalse("The result is empty", pods.isEmpty());
+		
+	}
+	
 	private void setupNamespace(MockRestServiceServer mockServer) {
 		
 		PathsModel paths = new PathsModel();
@@ -453,7 +520,8 @@ public class DeploymentTest {
 			.andExpect(method(GET))
 			.andRespond(withSuccess(write(resourceList(
 					resource("namespaces", "Namespace", false),
-					resource("services", "Service", true))), APPLICATION_JSON));
+					resource("services", "Service", true),
+					resource("pods", "Pod", true))), APPLICATION_JSON));
 
 		NamespaceModel model = new NamespaceModel();
 		model.getMetadata().setName(NAMESPACE);

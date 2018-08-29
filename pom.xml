@@ -7,10 +7,12 @@
 	<packaging>pom</packaging>
 	<name>kube-tools</name>
 	<modules>
-    <module>kube-connector</module>
-    <module>kube-connector-examples</module>
-    <module>docker-connector</module>
-    <module>docker-connector-examples</module>
+		<module>kube-connector</module>
+		<module>kube-connector-examples</module>
+		<module>docker-connector</module>
+		<module>docker-connector-examples</module>
+		<module>kube-operator-mariadb</module>
+    <module>kube-operator-mariadb-companion</module>
   </modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

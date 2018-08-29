@@ -3,16 +3,20 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import com.flyover.kube.tools.connector.model.DeploymentMetadataModel;
 import com.flyover.kube.tools.connector.model.DeploymentModel;
 import com.flyover.kube.tools.connector.model.DeploymentSpecModel;
 import com.flyover.kube.tools.connector.model.DeploymentTemplateModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
+import com.flyover.kube.tools.connector.model.PodModel;
 import com.flyover.kube.tools.connector.model.SelectorModel;
 
 /**
@@ -22,10 +26,15 @@ import com.flyover.kube.tools.connector.model.SelectorModel;
 public class Deployment {
 	
 	private Kubernetes kube;
-	private DeploymentModel model = new DeploymentModel();
+	private DeploymentModel model;
 
 	public Deployment(Kubernetes kube) {
+		this(kube, new DeploymentModel());
+	}
+	
+	public Deployment(Kubernetes kube, DeploymentModel model) {
 		this.kube = kube;
+		this.model = model;
 	}
 	
 	public KubeMetadataModel metadata() {
@@ -44,6 +53,29 @@ public class Deployment {
 	public Deployment containers(Container c) {
 		this.spec().template().podSpec().containers(c);
 		return this;
+	}
+	
+	public Deployment volumes(Volume v) {
+		this.spec().template().podSpec().volumes(v);
+		return this;
+	}
+	
+	public Deployment serviceAccount(String sa) {
+		this.spec().template().podSpec().serviceAccount(sa);
+		return this;
+	}
+	
+	public Deployment nodeSelector(Map<String, String> selectors) {
+		this.spec().template().podSpec().nodeSelector(selectors);
+		return this;
+	}
+	
+	public Container containers(String name) {
+		
+		return this.spec().template().podSpec().containers().stream()
+			.filter(c -> name.equals(c.name()))
+				.findFirst().get();
+		
 	}
 	
 	public Deployment imagePullSecret(Secret s) {
@@ -144,6 +176,17 @@ public class Deployment {
 		service.spec().tcpPort(port);
 		
 		return service;
+		
+	}
+	
+	public List<Pod> pods() {
+		
+		PodModel model = new PodModel();
+		model.setMetadata(metadata());
+		
+		return kube.list(model, spec().selector().getMatchLabels()).stream()
+			.map(m -> new Pod(kube, m))
+				.collect(Collectors.toList());
 		
 	}
 	

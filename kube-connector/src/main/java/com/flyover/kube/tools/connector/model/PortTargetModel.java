@@ -9,6 +9,7 @@ package com.flyover.kube.tools.connector.model;
  */
 public class PortTargetModel extends Model {
 
+	private String name;
 	private String protocol;
 	private int port;
 	private int targetPort;
@@ -35,6 +36,14 @@ public class PortTargetModel extends Model {
 
 	public void setTargetPort(int targetPort) {
 		this.targetPort = targetPort;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 }

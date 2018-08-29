@@ -5,6 +5,11 @@ package com.flyover.kube.tools.connector;
 
 import static com.flyover.kube.tools.connector.PodSpec.Builders.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.flyover.kube.tools.connector.model.DeploymentModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 import com.flyover.kube.tools.connector.model.NamespaceModel;
 
@@ -77,6 +82,27 @@ public class Namespace {
 		
 	}
 	
+	public List<Deployment> deployments(Map<String, String> selectors) {
+		
+		DeploymentModel m = new DeploymentModel();
+		m.getMetadata().setNamespace(metadata().getName());
+		
+		return kube.list(m, selectors).stream()
+			.map(d -> new Deployment(kube, d))
+				.collect(Collectors.toList());
+		
+	}
+	
+	public Service service(String name) {
+		
+		Service service = new Service(kube);
+		service.metadata().setNamespace(metadata().getName());
+		service.metadata().setName(name);
+		
+		return service;
+		
+	}
+	
 	public Secret secret(String name) {
 		
 		Secret s = new Secret(kube);
@@ -84,6 +110,36 @@ public class Namespace {
 		s.metadata().setName(name);
 		
 		return s;
+		
+	}
+	
+	public ServiceAccount serviceAccount(String name) {
+		
+		ServiceAccount sa = new ServiceAccount(kube);
+		sa.metadata().setNamespace(metadata().getName());
+		sa.metadata().setName(name);
+		
+		return sa;
+		
+	}
+	
+	public Role role(String name) {
+		
+		Role role = new Role(kube);
+		role.metadata().setNamespace(metadata().getName());
+		role.metadata().setName(name);
+		
+		return role;
+		
+	}
+	
+	public RoleBinding roleBinding(String name) {
+		
+		RoleBinding roleBinding = new RoleBinding(kube);
+		roleBinding.metadata().setNamespace(metadata().getName());
+		roleBinding.metadata().setName(name);
+		
+		return roleBinding;
 		
 	}
 

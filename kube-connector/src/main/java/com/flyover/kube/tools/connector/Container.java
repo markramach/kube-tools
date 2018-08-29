@@ -3,11 +3,15 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.Arrays;
+
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
 import com.flyover.kube.tools.connector.model.EnvModel.SecretKeyRefModel;
 import com.flyover.kube.tools.connector.model.EnvModel.ValueFromModel;
 import com.flyover.kube.tools.connector.model.PortModel;
+import com.flyover.kube.tools.connector.model.TcpProbeModel;
+import com.flyover.kube.tools.connector.model.VolumeMountModel;
 
 /**
  * @author mramach
@@ -35,6 +39,16 @@ public class Container {
 		return this;
 	}
 	
+	public Container command(String...command) {
+		this.model.setCommand(Arrays.asList(command));
+		return this;
+	}
+	
+	public Container args(String...args) {
+		this.model.setArgs(Arrays.asList(args));
+		return this;
+	}
+	
 	public Container imagePullPolicy(String impagePullPolicy) {
 		this.model.setImagePullPolicy(impagePullPolicy);
 		return this;
@@ -51,6 +65,20 @@ public class Container {
 		return this;
 	}
 	
+	public Container readinessProbeTcp(int port, int initialDelaySeconds, int periodSeconds, int failureThreshold) {
+		
+		TcpProbeModel probe = new TcpProbeModel();
+		probe.getTcpSocket().setPort(port);
+		probe.setInitialDelaySeconds(initialDelaySeconds);
+		probe.setPeriodSeconds(periodSeconds);
+		probe.setFailureThreshold(failureThreshold);
+		
+		model.setReadinessProbe(probe);
+		
+		return this;
+		
+	}
+	
 	public Container env(String name, String value) {
 		
 		EnvModel e = new EnvModel();
@@ -58,6 +86,18 @@ public class Container {
 		e.setValue(value);
 		
 		model.getEnv().add(e);
+		
+		return this;
+		
+	}
+	
+	public Container volumeMount(Volume v, String mountPath) {
+		
+		VolumeMountModel vm = new VolumeMountModel();
+		vm.setName(v.name());
+		vm.setMountPath(mountPath);
+		
+		model.getVolumeMounts().add(vm);
 		
 		return this;
 		

@@ -36,6 +36,10 @@ public class Secret {
 		this.model.getData().put(key, Base64.getEncoder().encodeToString(value.getBytes())); 
 		return this;
 	}
+	
+	public String data(String key) {
+		return new String(Base64.getDecoder().decode(this.model.getData().get(key))); 
+	}
 
 	public Secret dockerconfigjson(String registry, String username, String password) {
 		
@@ -68,6 +72,18 @@ public class Secret {
 		return this;
 	}
 
+	public Secret find() {
+		
+		this.model = kube.find(this.model);
+		
+		if(this.model == null) {
+			return null;
+		}
+		
+		return this;
+		
+	}
+	
 	public Secret create() {
 		
 		this.model = kube.create(this.model);

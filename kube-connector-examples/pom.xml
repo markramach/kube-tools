@@ -12,6 +12,7 @@
 	<name>kube-connector-examples</name>
 	<url>http://maven.apache.org</url>
 	<properties>
+		<okhttp-version>3.6.0</okhttp-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
@@ -19,6 +20,16 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>kube-connector</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${okhttp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${okhttp-version}</version>
 		</dependency>
 	</dependencies>
 </project>

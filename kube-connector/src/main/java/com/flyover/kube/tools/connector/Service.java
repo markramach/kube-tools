@@ -70,6 +70,10 @@ public class Service {
 		public ServiceSpec(ServiceSpecModel model) {
 			this.model = model;
 		}
+		
+		public String clusterIP() {
+			return this.model.getClusterIP();
+		}
 
 		public Map<String, String> selectors() {
 			return this.model.getSelector();
@@ -77,7 +81,14 @@ public class Service {
 
 		public ServiceSpec tcpPort(int port) {
 			
+			return tcpPort("port-" + String.valueOf(model.getPorts().size()), port);
+			
+		}
+		
+		public ServiceSpec tcpPort(String name, int port) {
+			
 			PortTargetModel p = new PortTargetModel();
+			p.setName(name);
 			p.setProtocol("TCP");
 			p.setPort(port);
 			p.setTargetPort(port);

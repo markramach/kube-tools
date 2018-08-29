@@ -3,6 +3,10 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel.ImagePullSecretModel;
@@ -36,6 +40,30 @@ public class PodSpec {
 		return this;
 		
 	}
+	
+	public PodSpec volumes(Volume v) {
+		
+		this.model.getVolumes().add(v.model());
+		
+		return this;
+		
+	}
+	
+	public PodSpec serviceAccount(String sa) {
+		
+		this.model.setServiceAccount(sa);
+		
+		return this;
+		
+	}
+	
+	public List<Container> containers() {
+		
+		return this.model.getContainers().stream()
+			.map(c -> new Container(c))
+				.collect(Collectors.toList());
+		
+	}
 
 	public PodSpec imagePullSecret(Secret s) {
 
@@ -43,6 +71,16 @@ public class PodSpec {
 		secret.setName(s.metadata().getName());
 		
 		this.model.getImagePullSecrets().add(secret);
+		
+		return this;
+		
+	}
+	
+	public PodSpec nodeSelector(Map<String, String> selectors) {
+		
+		if(selectors != null && !selectors.isEmpty()) {
+			this.model.setNodeSelector(selectors);
+		}
 		
 		return this;
 		
