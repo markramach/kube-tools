@@ -58,6 +58,10 @@ public class Application {
 	private String token;
 	@Value("${location:ca1}")
 	private String location;
+	@Value("#{'${rbd.endpoints:127.0.0.1:6789}'.split(',')}")
+	private List<String> rbdEndpoints;
+	@Value("${rbd.pool:rbd}")
+	private String rbdPool;
 	@Autowired
 	private Kubernetes kube;
 	
@@ -145,7 +149,7 @@ public class Application {
 							.tcpPort(3306)
 							.tcpPort(4567)
 							.tcpPort(4444)
-							.readinessProbeTcp(3306, 15, 15, 10)
+							.readinessProbeTcp(3306, 5, 5, 30)
 							.env("MYSQL_ROOT_PASSWORD", rootSecret.data("password"))
 							.volumeMount(data, "/var/lib/mysql")
 							.args(
@@ -237,7 +241,7 @@ public class Application {
 							.tcpPort(3306)
 							.tcpPort(4567)
 							.tcpPort(4444)
-							.readinessProbeTcp(3306, 15, 15, 10)
+							.readinessProbeTcp(3306, 5, 5, 30)
 							.env("MYSQL_ROOT_PASSWORD", rs.data("password"))
 							.volumeMount(data, "/var/lib/mysql")
 							.args(
@@ -353,15 +357,7 @@ public class Application {
 	@Bean
 	public StorageProvider clcStorageProvider() {
 		
-		ClcStorageProvider provider = new ClcStorageProvider(
-				Arrays.asList(
-					"10.50.216.15:6789",
-					"10.50.216.16:6789",
-					"10.50.216.18:6789",
-					"10.50.216.19:6789"
-				), "rbd", location, 10);
-		
-		return provider;
+		return new ClcStorageProvider(rbdEndpoints, rbdPool, location, 10); 
 		
 	}
 	
