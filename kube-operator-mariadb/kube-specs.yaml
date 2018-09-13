@@ -11,53 +11,53 @@ items:
   kind: ClusterRole
   metadata:
     name: operator-mariadb
-  rules:
-  - apiGroups:
-    - 'mariadb.operator.flyover.com'
-    resources:
-    - databases
-    - databaseusers
-    verbs:
-    - get
-    - list
-    - watch
-    - create
-    - update
-    - patch
-    - delete
-  - apiGroups:
-    - 'cd.ctl.io'
-    resources:
-    - cephvolumes
-    verbs:
-    - get
-    - list
-    - watch
-    - create
-    - update
-    - patch
-    - delete
-  - apiGroups:
-    - ''
-    - extensions
-    - rbac.authorization.k8s.io
-    resources:
-    - namespaces
-    - deployments
-    - pods
-    - services
-    - secrets
-    - serviceaccounts
-    - roles
-    - rolebindings
-    verbs:
-    - get
-    - list
-    - watch
-    - create
-    - update
-    - patch
-    - delete
+rules:
+- apiGroups:
+  - 'mariadb.operator.flyover.com'
+  resources:
+  - databases
+  - databaseusers
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - 'cd.ctl.io'
+  resources:
+  - cephvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  - extensions
+  - rbac.authorization.k8s.io
+  resources:
+  - namespaces
+  - deployments
+  - pods
+  - services
+  - secrets
+  - serviceaccounts
+  - roles
+  - rolebindings
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
     
 - apiVersion: rbac.authorization.k8s.io/v1beta1
   kind: ClusterRoleBinding

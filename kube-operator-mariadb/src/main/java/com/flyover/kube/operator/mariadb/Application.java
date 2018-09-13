@@ -51,6 +51,7 @@ public class Application {
 
 	private static final String BOOTSTRAP_FLAG = "mariadb.bootstrap";
 	private static final String CLUSTER_ID = "mariadb.cluster";
+	private static final String LOCATION_ID = "mariadb.cluster.location";
 	
 	@Value("${kubernetes.endpoint:https://192.168.253.1}")
 	private String endpoint;
@@ -62,6 +63,8 @@ public class Application {
 	private List<String> rbdEndpoints;
 	@Value("${rbd.pool:rbd}")
 	private String rbdPool;
+	@Value("${rbd.image.size:50}")
+	private Integer rbdImageSize;
 	@Autowired
 	private Kubernetes kube;
 	
@@ -175,10 +178,13 @@ public class Application {
 								String.format("--clusterId=%s", clusterId)
 							));
 				d.spec().selector().getMatchLabels().put(CLUSTER_ID, clusterId);
+				d.spec().selector().getMatchLabels().put(LOCATION_ID, location);
 				d.spec().selector().getMatchLabels().put(BOOTSTRAP_FLAG, "true");
 				d.spec().template().metadata().getLabels().put(CLUSTER_ID, clusterId);
+				d.spec().template().metadata().getLabels().put(LOCATION_ID, location);
 				d.spec().template().metadata().getLabels().put(BOOTSTRAP_FLAG, "true");
 				d.metadata().getLabels().put(CLUSTER_ID, clusterId);
+				d.metadata().getLabels().put(LOCATION_ID, location);
 				d.metadata().getLabels().put(BOOTSTRAP_FLAG, "true");
 				// update deployment
 				d.merge();
@@ -197,19 +203,37 @@ public class Application {
 			
 		}
 		
-		Service service = ns.service(clusterId).find();
+		Service clusterService = ns.service(clusterId).find();
 		
-		if(service == null) {
+		if(clusterService == null) {
 
-			service = ns.service(clusterId);
-			service.spec().tcpPort(3306);
-			service.spec().tcpPort(4567);
-			service.spec().tcpPort(4444);
-			service.spec().selectors().put(CLUSTER_ID, clusterId);
+			clusterService = ns.service(clusterId);
+			clusterService.spec().tcpPort(3306);
+			clusterService.spec().tcpPort(4567);
+			clusterService.spec().tcpPort(4444);
+			clusterService.spec().selectors().put(CLUSTER_ID, clusterId);
 			
-			service.merge();
+			clusterService.merge();
 			
-			System.out.println(String.format("service %s created", service.metadata().getName()));
+			System.out.println(String.format("service %s created", clusterService.metadata().getName()));
+			
+		}
+		
+		String locationId = String.format("%s-%s", clusterId, location);
+		Service locationService = ns.service(locationId).find();
+		
+		if(locationService == null) {
+
+			locationService = ns.service(locationId);
+			locationService.spec().tcpPort(3306);
+			locationService.spec().tcpPort(4567);
+			locationService.spec().tcpPort(4444);
+			locationService.spec().selectors().put(CLUSTER_ID, clusterId);
+			locationService.spec().selectors().put(LOCATION_ID, location);
+			
+			locationService.merge();
+			
+			System.out.println(String.format("service %s created", locationService.metadata().getName()));
 			
 		}
 		
@@ -257,10 +281,13 @@ public class Application {
 								String.format("--wsrep_sst_auth=root:%s", rs.data("password"))
 							));
 				d2.spec().selector().getMatchLabels().put(CLUSTER_ID, clusterId);
+				d2.spec().selector().getMatchLabels().put(LOCATION_ID, location);
 				d2.spec().selector().getMatchLabels().put(BOOTSTRAP_FLAG, "false");
 				d2.spec().template().metadata().getLabels().put(CLUSTER_ID, clusterId);
+				d2.spec().template().metadata().getLabels().put(LOCATION_ID, location);
 				d2.spec().template().metadata().getLabels().put(BOOTSTRAP_FLAG, "false");
 				d2.metadata().getLabels().put(CLUSTER_ID, clusterId);
+				d2.metadata().getLabels().put(LOCATION_ID, location);
 				d2.metadata().getLabels().put(BOOTSTRAP_FLAG, "false");
 				// update deployment
 				d2.merge();
@@ -357,7 +384,7 @@ public class Application {
 	@Bean
 	public StorageProvider clcStorageProvider() {
 		
-		return new ClcStorageProvider(rbdEndpoints, rbdPool, location, 10); 
+		return new ClcStorageProvider(rbdEndpoints, rbdPool, location, rbdImageSize); 
 		
 	}
 	
