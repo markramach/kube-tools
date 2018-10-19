@@ -74,6 +74,11 @@ public class Service {
 		public String clusterIP() {
 			return this.model.getClusterIP();
 		}
+		
+		public ServiceSpec clusterIP(String clusterIP) {
+			this.model.setClusterIP(clusterIP);
+			return this;
+		}
 
 		public Map<String, String> selectors() {
 			return this.model.getSelector();

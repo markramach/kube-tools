@@ -32,7 +32,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flyover.kube.tools.connector.model.GenericKubeItemsModel;
 import com.flyover.kube.tools.connector.model.KubeModel;
@@ -41,6 +40,7 @@ import com.flyover.kube.tools.connector.model.PodModel;
 import com.flyover.kube.tools.connector.model.ResourceListModel;
 import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
+import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
 
 /**
  * @author mramach
@@ -128,6 +128,15 @@ public class Kubernetes {
 		
 	}
 	
+	public Volume emptyDir(String alias) {
+		
+		EmptyDirVolumeModel model = new EmptyDirVolumeModel();
+		model.setName(alias);
+		
+		return new Volume(model);
+		
+	}
+	
 	public <T extends KubeModel> T create(T model) {
 
 		ResourceRef ref = resource(model);
@@ -170,8 +179,6 @@ public class Kubernetes {
 	
 	public <T extends KubeModel> T find(T model) {
 
-		System.out.println("executing find operation");
-		
 		return find(uri(model, resource(model)), model);
 		
 	}
@@ -184,8 +191,6 @@ public class Kubernetes {
 	
 	@SuppressWarnings("unchecked")
 	public <T extends KubeModel> List<T> list(T model, Map<String, String> selectors) {
-		
-		System.out.println("executing list operation");
 		
 		return (List<T>) list(model.getClass(), uri(model, resource(model), true), selectors);
 		
@@ -338,15 +343,6 @@ public class Kubernetes {
 
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
 		
-		try {
-			
-			System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(model));
-			
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		return (T) restTemplate.postForObject(uri, model, model.getClass());
 		
 	}
@@ -359,8 +355,6 @@ public class Kubernetes {
 		if(model.checksum().equals(checksum)) {
 			return existing;
 		}
-		
-		System.out.println(String.format("change detected, updating model %s", uri));
 		
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
 		

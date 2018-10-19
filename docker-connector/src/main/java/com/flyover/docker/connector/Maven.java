@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -50,6 +51,9 @@ import org.sonatype.aether.collection.DependencyTraverser;
 import org.sonatype.aether.connector.async.AsyncRepositoryConnectorFactory;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
+import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.graph.DependencyFilter;
+import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.impl.ArtifactDescriptorReader;
 import org.sonatype.aether.impl.VersionRangeResolver;
 import org.sonatype.aether.impl.VersionResolver;
@@ -67,6 +71,8 @@ import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
+import org.sonatype.aether.util.filter.AndDependencyFilter;
+import org.sonatype.aether.util.filter.ScopeDependencyFilter;
 import org.sonatype.aether.util.graph.manager.ClassicDependencyManager;
 import org.sonatype.aether.util.graph.selector.AndDependencySelector;
 import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
@@ -162,8 +168,16 @@ public class Maven {
 					dependency.getClassifier(), 
 					dependency.getType(), 
 					dependency.getVersion());
+
+			List<String> exclusions = dependency.getExclusions().stream()
+				.map(e -> e.getGroupId() + ":" + e.getArtifactId())
+					.collect(Collectors.toList());
 			
-			return aether.resolve(artifact, "compile");
+			AndDependencyFilter filter = new AndDependencyFilter(
+				new ScopeDependencyFilter("test", "provided", "runtime"),
+				new ExclusionsDependencyFilter(exclusions));
+			
+			return aether.resolve(artifact, "compile", filter);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -355,6 +369,57 @@ public class Maven {
 	            }
 	        }
 	        return main;
+	    }
+	    
+	    public static class ExclusionsDependencyFilter implements DependencyFilter {
+
+	    	private Collection<String> excludes = new LinkedList<>();
+	    	
+			public ExclusionsDependencyFilter(Collection<String> excludes) {
+				this.excludes.addAll(excludes);
+			}
+
+			@Override
+			public boolean accept(DependencyNode node, List<DependencyNode> parents) {
+				
+		        Dependency dependency = node.getDependency();
+
+		        List<DependencyNode> excluded = parents.stream()
+		        	.filter(d -> !accept(d.getDependency()))
+		        		.collect(Collectors.toList());
+		        
+		        boolean result = accept(dependency) && excluded.isEmpty();
+		        
+		        String indent = parents.stream().map(d -> "\t").collect(Collectors.joining(""));
+		        
+		        System.out.println(indent + dependency + (result ? "" : "(excluded)"));
+		        
+		        return result;
+		        
+			}
+
+			private boolean accept(Dependency dependency) {
+				
+				if ( dependency == null ) {
+		            return true;
+		        }
+
+		        String id = dependency.getArtifact().getArtifactId();
+
+		        if ( excludes.contains( id ) ) {
+		            return false;
+		        }
+
+		        id = dependency.getArtifact().getGroupId() + ':' + id;
+
+		        if ( excludes.contains( id ) ) {
+		            return false;
+		        }
+
+		        return true;
+		        
+			}
+	    	
 	    }
 	  
 }

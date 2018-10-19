@@ -103,6 +103,16 @@ public class Namespace {
 		
 	}
 	
+	public Ingress ingress(String name) {
+		
+		Ingress ingress = new Ingress(kube);
+		ingress.metadata().setNamespace(metadata().getName());
+		ingress.metadata().setName(name);
+		
+		return ingress;
+		
+	}
+	
 	public Secret secret(String name) {
 		
 		Secret s = new Secret(kube);
