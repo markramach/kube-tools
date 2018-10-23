@@ -201,7 +201,14 @@ public class Kubernetes {
 	@SuppressWarnings("unchecked")
 	public <T extends KubeModel> List<T> list(T model, Map<String, String> selectors) {
 		
-		return (List<T>) list(model.getClass(), uri(model, resource(model), true), selectors);
+		return (List<T>) list(model.getClass(), uri(model, resource(model), true, false), selectors);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends KubeModel> List<T> listAllNamespaces(T model, Map<String, String> selectors) {
+		
+		return (List<T>) list(model.getClass(), uri(model, resource(model), true, true), selectors);
 		
 	}
 	
@@ -289,11 +296,11 @@ public class Kubernetes {
 
 	private <T extends KubeModel> URI uri(T model, ResourceRef ref) {
 		
-		return uri(model, ref, false);
+		return uri(model, ref, false, false);
 		
 	}
 	
-	private <T extends KubeModel> URI uri(T model, ResourceRef ref, boolean list) {
+	private <T extends KubeModel> URI uri(T model, ResourceRef ref, boolean list, boolean allNamespaces) {
 		
 		URI uri = null;
 		
@@ -301,11 +308,17 @@ public class Kubernetes {
 			
 			UriComponentsBuilder builder = UriComponentsBuilder
     			.fromHttpUrl(config.getEndpoint())
-    			.path(ref.getPath())
-    			.path("/namespaces/")
-    			.path(model.getMetadata().getNamespace())
-    			.path("/")
-    			.path(ref.getResource().getName());
+    			.path(ref.getPath());
+			
+				if(!allNamespaces) {
+					
+					builder.path("/namespaces/")
+    					.path(model.getMetadata().getNamespace());
+					
+				}
+    			
+    			builder.path("/")
+    				.path(ref.getResource().getName());
 			
 			if(!list) {
 			

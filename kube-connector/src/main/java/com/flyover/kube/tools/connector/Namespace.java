@@ -30,6 +30,10 @@ public class Namespace {
 	public KubeMetadataModel metadata() {
 		return this.model.getMetadata();
 	}
+	
+	protected Kubernetes kube() {
+		return kube;
+	}
 
 	public Namespace create() {
 		

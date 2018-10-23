@@ -58,6 +58,12 @@ public class Ingress {
 		
 	}
 	
+	public void delete() {
+		
+		kube.delete(this.model);
+		
+	}
+	
 	public static class IngressSpec {
 		
 		private IngressSpecModel model;
