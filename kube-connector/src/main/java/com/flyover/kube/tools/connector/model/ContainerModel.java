@@ -3,6 +3,8 @@
  */
 package com.flyover.kube.tools.connector.model;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class ContainerModel extends Model {
 	private List<EnvModel> env = new LinkedList<>();
 	private List<VolumeMountModel> volumeMounts = new LinkedList<>();
 	private List<String> command = new LinkedList<>();
-	private List<String> args = new LinkedList<>();
+	private Collection<String> args = new HashSet<>();
 	private ProbeModel readinessProbe;
 
 	public String getName() {
@@ -70,12 +72,12 @@ public class ContainerModel extends Model {
 		this.command = command;
 	}
 
-	public List<String> getArgs() {
+	public Collection<String> getArgs() {
 		return args;
 	}
 
-	public void setArgs(List<String> args) {
-		this.args = args;
+	public void setArgs(Collection<String> args) {
+		this.args = new HashSet<>(args);
 	}
 
 	public List<VolumeMountModel> getVolumeMounts() {

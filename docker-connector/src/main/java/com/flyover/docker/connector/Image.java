@@ -71,14 +71,20 @@ public class Image {
 		}
 		
 		// construct docker file commands
-		Dockerfile df = new Dockerfile("openjdk:8u151-jdk-alpine")
+		Dockerfile df = new Dockerfile(target, "openjdk:8u151-jdk-alpine")
 			.run(String.format("mkdir -p /app/lib"))
 			.run(String.format("mkdir -p /app/classes"))
 			.add("lib", "/app/lib")
 			.add("classes", "/app/classes")
 			.entrypoint(String.format("java -cp /app/classes:/app/lib/* %s", entrypoint.getName()));
 		
-		Path dockerfile = target.resolve("Dockerfile");
+		return this.build(df);
+		
+	}
+	
+	public Image build(Dockerfile df) {
+
+		Path dockerfile = df.getTarget().resolve("Dockerfile");
 		
 		try {
 			
@@ -92,7 +98,7 @@ public class Image {
 		
 		try {
 			
-			ctx.getClient().buildImageCmd(target.toFile())
+			ctx.getClient().buildImageCmd(df.getTarget().toFile())
 				.exec(callback).awaitCompletion(10, TimeUnit.MINUTES);
 			
 			this.imageId = callback.awaitImageId();

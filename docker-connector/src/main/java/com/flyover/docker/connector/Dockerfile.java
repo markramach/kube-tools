@@ -3,6 +3,7 @@
  */
 package com.flyover.docker.connector;
 
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,9 +14,11 @@ import java.util.stream.Collectors;
  */
 public class Dockerfile {
 	
+	private Path target;
 	private List<String> commands = new LinkedList<>();
 
-	public Dockerfile(String baseImage) {
+	public Dockerfile(Path target, String baseImage) {
+		this.target = target;
 		commands.add(String.format("FROM %s", baseImage));
 	}
 	
@@ -26,6 +29,11 @@ public class Dockerfile {
 	
 	public Dockerfile add(String source, String dest) {
 		commands.add(String.format("ADD %s %s", source, dest));
+		return this;
+	}
+	
+	public Dockerfile volume(String volume) {
+		commands.add(String.format("VOLUME %s", volume));
 		return this;
 	}
 	
@@ -45,6 +53,10 @@ public class Dockerfile {
 			.collect(Collectors.joining("\n"))
 				.getBytes();
 		
+	}
+
+	public Path getTarget() {
+		return target;
 	}
 
 }

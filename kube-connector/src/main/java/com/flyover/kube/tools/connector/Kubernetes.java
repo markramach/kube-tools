@@ -128,6 +128,15 @@ public class Kubernetes {
 		
 	}
 	
+	public CustomResourceDefinition crd(String name) {
+		
+		CustomResourceDefinition crd = new CustomResourceDefinition(this);
+		crd.metadata().setName(name);
+		
+		return crd;
+		
+	}
+	
 	public Volume emptyDir(String alias) {
 		
 		EmptyDirVolumeModel model = new EmptyDirVolumeModel();

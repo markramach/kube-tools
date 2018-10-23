@@ -4,6 +4,8 @@
 package com.flyover.kube.tools.connector;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
@@ -45,8 +47,12 @@ public class Container {
 	}
 	
 	public Container args(String...args) {
-		this.model.setArgs(Arrays.asList(args));
+		this.model.setArgs(new HashSet<>(Arrays.asList(args)));
 		return this;
+	}
+	
+	public Collection<String> args() {
+		return this.model.getArgs();
 	}
 	
 	public Container imagePullPolicy(String impagePullPolicy) {
@@ -122,7 +128,7 @@ public class Container {
 		
 	}
 
-	protected ContainerModel model() {
+	public ContainerModel model() {
 		return this.model;
 	}
 
