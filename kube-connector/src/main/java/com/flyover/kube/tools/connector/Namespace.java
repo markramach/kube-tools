@@ -157,4 +157,12 @@ public class Namespace {
 		
 	}
 
+	public NetworkPolicy networkPolicy(String name) {
+		NetworkPolicy networkPolicy = new NetworkPolicy(kube);
+		networkPolicy.metadata().setNamespace(metadata().getName());
+		networkPolicy.metadata().setName(name);
+
+		return networkPolicy;
+	}
+
 }
