@@ -4,7 +4,7 @@ import com.flyover.kube.tools.connector.NetworkPolicy;
 
 import java.util.List;
 
-public class NetworkPolicySpecModel {
+public class NetworkPolicySpecModel extends Model {
 
     private SelectorModel podSelector;
     private List<NetworkPolicyEgressRuleModel> egress;

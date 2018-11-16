@@ -1,6 +1,6 @@
 package com.flyover.kube.tools.connector.model;
 
-public class NetworkPolicyPeerModel {
+public class NetworkPolicyPeerModel extends Model {
 
     private SelectorModel namespaceSelector;
     private SelectorModel podSelector;
