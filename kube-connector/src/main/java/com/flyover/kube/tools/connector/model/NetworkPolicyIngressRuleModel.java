@@ -2,7 +2,7 @@ package com.flyover.kube.tools.connector.model;
 
 import java.util.List;
 
-public class NetworkPolicyIngressRuleModel {
+public class NetworkPolicyIngressRuleModel extends Model {
 
     private List<NetworkPolicyPeerModel> from;
 
