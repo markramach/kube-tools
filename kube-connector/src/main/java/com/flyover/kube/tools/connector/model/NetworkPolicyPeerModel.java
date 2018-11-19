@@ -4,6 +4,7 @@ public class NetworkPolicyPeerModel extends Model {
 
     private SelectorModel namespaceSelector;
     private SelectorModel podSelector;
+    private IpBlock ipBlock;
 
     public SelectorModel getNamespaceSelector() {
         return namespaceSelector;
@@ -20,5 +21,9 @@ public class NetworkPolicyPeerModel extends Model {
     public void setPodSelector(SelectorModel podSelector) {
         this.podSelector = podSelector;
     }
+
+    public IpBlock getIpBlock() { return ipBlock; }
+
+    public void setIpBlock(IpBlock ipBlock) { this.ipBlock = ipBlock; }
 
 }
