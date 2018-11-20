@@ -18,6 +18,18 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 	</properties>
+	<distributionManagement>
+		<repository>
+			<id>ctnr-nexus</id>
+			<name>ctnr-nexus</name>
+			<url>https://nexus.ctnr.ctl.io/repository/ctl-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>ctnr-nexus</id>
+			<name>ctnr-nexus</name>
+			<url>https://nexus.ctnr.ctl.io/repository/ctl-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<build>
 		<plugins>
 			<plugin>

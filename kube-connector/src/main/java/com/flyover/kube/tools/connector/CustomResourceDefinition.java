@@ -76,6 +76,11 @@ public class CustomResourceDefinition {
 			return this;
 		}
 		
+		public CustomResourceDefinitionSpec cluster() {
+			this.model.setScope("Cluster");
+			return this;
+		}
+		
 		public CustomResourceDefinitionSpec group(String group) {
 			this.model.setGroup(group);
 			return this;
