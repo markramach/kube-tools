@@ -165,4 +165,13 @@ public class Namespace {
 		return networkPolicy;
 	}
 
+	public ConfigMap configMap(String name) {
+		ConfigMap configMap = new ConfigMap(kube);
+
+		configMap.metadata().setNamespace(metadata().getName());
+		configMap.metadata().setName(name);
+
+		return configMap;
+	}
+
 }
