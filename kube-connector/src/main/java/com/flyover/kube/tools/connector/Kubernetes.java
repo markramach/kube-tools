@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -534,6 +536,19 @@ public class Kubernetes {
 			return resource;
 		}
 		
+	}
+
+	public Volume createConfigMapVolume(String alias) {
+		ConfigMapVolumeModel configMapVolumeModel = new ConfigMapVolumeModel();
+
+		configMapVolumeModel.setName(alias);
+		configMapVolumeModel.setDefaultMode(420);
+		ConfigMapVolumeModel.KeyToPathModel keyToPathModel = new ConfigMapVolumeModel.KeyToPathModel();
+		keyToPathModel.setKey("config");
+		keyToPathModel.setPath(alias);
+		configMapVolumeModel.setItems(Arrays.asList(keyToPathModel));
+
+		return new Volume(configMapVolumeModel);
 	}
 	
 }

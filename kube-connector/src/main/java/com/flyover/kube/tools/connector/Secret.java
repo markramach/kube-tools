@@ -36,6 +36,13 @@ public class Secret {
 		this.model.getData().put(key, Base64.getEncoder().encodeToString(value.getBytes())); 
 		return this;
 	}
+
+	public Secret data(Map<String, String> secrets ) {
+		for(String key: secrets.keySet()) {
+			this.model.getData().put(key, Base64.getEncoder().encodeToString(secrets.get(key).getBytes()));
+		}
+		return this;
+	}
 	
 	public String data(String key) {
 		return new String(Base64.getDecoder().decode(this.model.getData().get(key))); 
@@ -99,5 +106,9 @@ public class Secret {
 		return create();
 		
 	}
+
+	public void delete() {
+	    kube.delete(this.model);
+    }
 
 }

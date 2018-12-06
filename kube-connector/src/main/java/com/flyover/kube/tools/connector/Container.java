@@ -3,9 +3,7 @@
  */
 package com.flyover.kube.tools.connector;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
@@ -126,6 +124,13 @@ public class Container {
 		
 		return this;
 		
+	}
+
+	public Container envs(Secret secret) {
+		secret.data().keySet().stream().forEach(key -> {
+			env(key, key, secret);
+		});
+		return this;
 	}
 
 	public ContainerModel model() {
