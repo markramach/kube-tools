@@ -128,7 +128,7 @@ public class Container {
 
 	public Container envs(Secret secret) {
 		secret.data().keySet().stream().forEach(key -> {
-			env(key, secret.data(key));
+			env(key, key, secret);
 		});
 		return this;
 	}
