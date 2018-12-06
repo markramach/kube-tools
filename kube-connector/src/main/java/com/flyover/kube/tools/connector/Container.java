@@ -3,9 +3,7 @@
  */
 package com.flyover.kube.tools.connector;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
@@ -126,6 +124,16 @@ public class Container {
 		
 		return this;
 		
+	}
+
+	public Container setEnvs(Secret secret) {
+		Map<String, String> secretMap= secret.data();
+
+		for(String key : secretMap.keySet()) {
+			env(key, new String (Base64.getDecoder().decode(secretMap.get(key))));
+		}
+
+		return this;
 	}
 
 	public ContainerModel model() {
