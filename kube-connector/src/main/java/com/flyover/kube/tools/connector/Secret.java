@@ -107,4 +107,8 @@ public class Secret {
 		
 	}
 
+	public void delete() {
+	    kube.delete(this.model);
+    }
+
 }
