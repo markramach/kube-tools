@@ -126,13 +126,10 @@ public class Container {
 		
 	}
 
-	public Container setEnvs(Secret secret) {
-		Map<String, String> secretMap= secret.data();
-
-		for(String key : secretMap.keySet()) {
-			env(key, new String (Base64.getDecoder().decode(secretMap.get(key))));
-		}
-
+	public Container envs(Secret secret) {
+		secret.data().keySet().stream().forEach(key -> {
+			env(key, secret.data(key));
+		});
 		return this;
 	}
 
