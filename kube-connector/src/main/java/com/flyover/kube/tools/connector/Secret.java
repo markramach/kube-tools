@@ -99,7 +99,19 @@ public class Secret {
 		
 	}
 	
-	public Secret replace() {
+	public Secret merge() {
+		
+		SecretModel existing = kube.find(this.model);
+				
+		if(existing == null) {
+			return create();
+		}
+		
+		String checksum = existing.getMetadata().getAnnotations().getOrDefault("com.flyover.checksum", "");
+		
+		if(model.checksum().equals(checksum)) {
+			return this;
+		}
 		
 		kube.delete(this.model);
 		

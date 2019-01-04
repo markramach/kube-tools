@@ -158,7 +158,7 @@ public class SecretTest {
 		Secret secret = kube.namespace(NAMESPACE).findOrCreate()
 			.secret("name")
 			.data("key", "value")
-				.replace();
+				.merge();
 		
 		mockServer.verify();
 		
