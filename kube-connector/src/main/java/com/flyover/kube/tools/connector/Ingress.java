@@ -106,9 +106,22 @@ public class Ingress {
 		
 		public RuleSpec path(String path, String serviceName, int servicePort) {
 			
+			Optional<Path> existing = model.getHttp().getPaths().stream()
+				.filter(p -> p.getPath().equals(path))
+					.findFirst();
+			
 			BackendModel backend = new BackendModel();
 			backend.setServiceName(serviceName);
 			backend.setServicePort(servicePort);
+			
+			if(existing.isPresent()) {
+				
+				Path p = existing.get();
+				p.setBackend(backend);
+				
+				return this;
+				
+			}
 			
 			Path p = new Path();
 			p.setBackend(backend);
