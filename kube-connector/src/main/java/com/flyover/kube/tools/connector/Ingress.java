@@ -3,6 +3,8 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.Optional;
+
 import com.flyover.kube.tools.connector.model.IngressModel;
 import com.flyover.kube.tools.connector.model.IngressSpecModel;
 import com.flyover.kube.tools.connector.model.IngressSpecModel.BackendModel;
@@ -73,6 +75,14 @@ public class Ingress {
 		}
 		
 		public RuleSpec rule(String host) {
+			
+			Optional<Rule> existing = this.model.getRules().stream()
+				.filter(r -> r.getHost().equals(host))
+					.findFirst();
+			
+			if(existing.isPresent()) {
+				return new RuleSpec(existing.get());
+			}
 			
 			Rule r = new Rule();
 			r.setHost(host);
