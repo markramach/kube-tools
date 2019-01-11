@@ -6,6 +6,7 @@ package com.flyover.kube.tools.connector;
 import java.util.*;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
+import com.flyover.kube.tools.connector.model.ComputeResourceModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
 import com.flyover.kube.tools.connector.model.EnvModel.SecretKeyRefModel;
 import com.flyover.kube.tools.connector.model.EnvModel.ValueFromModel;
@@ -93,6 +94,15 @@ public class Container {
 		
 		return this;
 		
+	}
+
+	public Container resources(Map<String, String> requests, Map<String, String> limits) {
+		ComputeResourceModel c = new ComputeResourceModel();
+		c.setRequests(requests);
+		c.setLimits(limits);
+
+		this.model.setResources(c);
+		return this;
 	}
 	
 	public Container volumeMount(Volume v, String mountPath) {

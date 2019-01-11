@@ -23,6 +23,7 @@ public class ContainerModel extends Model {
 	private List<String> command = new LinkedList<>();
 	private Collection<String> args = new HashSet<>();
 	private ProbeModel readinessProbe;
+	private ComputeResourceModel resources;
 
 	public String getName() {
 		return name;
@@ -95,5 +96,9 @@ public class ContainerModel extends Model {
 	public void setReadinessProbe(ProbeModel readinessProbe) {
 		this.readinessProbe = readinessProbe;
 	}
+
+	public ComputeResourceModel getResources() { return resources; }
+
+	public void setResources(ComputeResourceModel resources) { this.resources = resources; }
 
 }
