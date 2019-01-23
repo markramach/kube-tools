@@ -3,9 +3,14 @@
  */
 package com.flyover.kube.tools.connector;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
+import com.flyover.kube.tools.connector.model.ContainerModel.ResourceModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
 import com.flyover.kube.tools.connector.model.EnvModel.SecretKeyRefModel;
 import com.flyover.kube.tools.connector.model.EnvModel.ValueFromModel;
@@ -132,9 +137,54 @@ public class Container {
 		});
 		return this;
 	}
+	
+	public Resources resources() {
+		
+		if(model.getResources() == null) {
+			model.setResources(new ResourceModel());
+		}
+		
+		return new Resources(model.getResources());
+		
+	}
 
 	public ContainerModel model() {
 		return this.model;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static class Resources {
+
+		private ResourceModel model;
+		
+		public Resources(ResourceModel model) {
+			this.model = model;
+		}
+		
+		public Resources limits(Map<String, Object>...limits) {
+			
+			Arrays.asList(limits).forEach(l -> model.getLimits().putAll(l));
+			
+			return this;
+			
+		}
+		
+		public Resources requests(Map<String, Object>...requests) {
+			
+			Arrays.asList(requests).forEach(r -> model.getRequests().putAll(r));
+			
+			return this;
+			
+		}
+		
+		public static Map<String, Object> cpu(String value) {
+			return Collections.singletonMap("cpu", value);
+		}
+		
+		public static Map<String, Object> memory(String value) {
+			return Collections.singletonMap("memory", value);
+		}
+
 	}
 
 }

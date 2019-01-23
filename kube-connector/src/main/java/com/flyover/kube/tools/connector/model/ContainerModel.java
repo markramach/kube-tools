@@ -5,8 +5,10 @@ package com.flyover.kube.tools.connector.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author mramach
@@ -23,6 +25,7 @@ public class ContainerModel extends Model {
 	private List<String> command = new LinkedList<>();
 	private Collection<String> args = new HashSet<>();
 	private ProbeModel readinessProbe;
+	private ResourceModel resources;
 
 	public String getName() {
 		return name;
@@ -94,6 +97,37 @@ public class ContainerModel extends Model {
 
 	public void setReadinessProbe(ProbeModel readinessProbe) {
 		this.readinessProbe = readinessProbe;
+	}
+	
+	public ResourceModel getResources() {
+		return resources;
+	}
+
+	public void setResources(ResourceModel resources) {
+		this.resources = resources;
+	}
+
+	public static class ResourceModel extends Model {
+	
+		private Map<String, Object> limits = new LinkedHashMap<>();
+		private Map<String, Object> requests = new LinkedHashMap<>();
+		
+		public Map<String, Object> getLimits() {
+			return limits;
+		}
+		
+		public void setLimits(Map<String, Object> limits) {
+			this.limits = limits;
+		}
+
+		public Map<String, Object> getRequests() {
+			return requests;
+		}
+
+		public void setRequests(Map<String, Object> requests) {
+			this.requests = requests;
+		}
+		
 	}
 
 }
