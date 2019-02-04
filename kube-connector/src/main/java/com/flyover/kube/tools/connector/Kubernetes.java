@@ -19,7 +19,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -42,6 +41,7 @@ import com.flyover.kube.tools.connector.model.PodModel;
 import com.flyover.kube.tools.connector.model.ResourceListModel;
 import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
+import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
 
 /**
@@ -147,8 +147,12 @@ public class Kubernetes {
 		return new Volume(model);
 		
 	}
-	
+
 	public <T extends KubeModel> T create(T model) {
+		return create(model, new Callback<T>() {});
+	}
+	
+	public <T extends KubeModel> T create(T model, Callback<T> c) {
 
 		ResourceRef ref = resource(model);
 		
@@ -164,7 +168,7 @@ public class Kubernetes {
     			.build()
     				.toUri();
 			
-			return create(uri, model);
+			return create(uri, model, c);
 			
 		} else {
 			
@@ -176,15 +180,19 @@ public class Kubernetes {
     			.build()
     				.toUri();
 			
-			return create(uri, model);
+			return create(uri, model, c);
 			
 		}
 		
 	}
 	
 	public <T extends KubeModel> T update(T existing, T model) {
+		return update(existing, model, new Callback<T>() {});
+	}
+	
+	public <T extends KubeModel> T update(T existing, T model, Callback<T> c) {
 
-		return update(uri(model, resource(model)), existing, model);
+		return update(uri(model, resource(model)), existing, model, c);
 		
 	}
 	
@@ -363,16 +371,20 @@ public class Kubernetes {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T extends KubeModel> T create(URI uri, T model) {
+	private <T extends KubeModel> T create(URI uri, T model, Callback<T> c) {
 
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
 		
-		return (T) restTemplate.postForObject(uri, model, model.getClass());
+		T res = (T) restTemplate.postForObject(uri, model, model.getClass());
+		
+		c.onCreate(res);
+		
+		return res;
 		
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T extends KubeModel> T update(URI uri, T existing, T model) {
+	private <T extends KubeModel> T update(URI uri, T existing, T model, Callback<T> c) {
 
 		String checksum = existing.getMetadata().getAnnotations().getOrDefault("com.flyover.checksum", "");
 		
@@ -384,7 +396,11 @@ public class Kubernetes {
 		
 		existing.merge(model);
 		
-		return (T) restTemplate.exchange(uri, HttpMethod.PUT, new HttpEntity<>(existing), model.getClass()).getBody();
+		T res = (T) restTemplate.exchange(uri, HttpMethod.PUT, new HttpEntity<>(existing), model.getClass()).getBody();
+		
+		c.onUpdate(res);
+		
+		return res;
 		
 	}
 	

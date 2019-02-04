@@ -101,6 +101,20 @@ public class Deployment {
 		
 	}
 	
+	public Deployment merge(Callback<DeploymentModel> c) {
+		
+		DeploymentModel found = kube.find(this.model);
+		
+		if(found == null) {
+			this.model = kube.create(this.model, c);
+		} else {
+			this.model = kube.update(found, this.model, c);
+		}
+		
+		return this;
+		
+	}
+	
 	public Deployment find() {
 	
 		this.model = kube.find(this.model);
@@ -238,5 +252,5 @@ public class Deployment {
 		return this;
 		
 	}
-
+	
 }
