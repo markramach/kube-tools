@@ -48,6 +48,20 @@ public class Ingress {
 		
 	}
 	
+	public Ingress merge(Callback<IngressModel> c) {
+		
+		IngressModel found = kube.find(this.model);
+		
+		if(found == null) {
+			this.model = kube.create(this.model, c);
+		} else {
+			this.model = kube.update(found, this.model, c);
+		}
+		
+		return this;
+		
+	}
+	
 	public Ingress find() {
 		
 		this.model = kube.find(this.model);
