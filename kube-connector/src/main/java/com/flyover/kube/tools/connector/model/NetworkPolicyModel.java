@@ -1,6 +1,5 @@
 package com.flyover.kube.tools.connector.model;
 
-import com.flyover.kube.tools.connector.Kubernetes;
 
 public class NetworkPolicyModel extends KubeModel {
 
