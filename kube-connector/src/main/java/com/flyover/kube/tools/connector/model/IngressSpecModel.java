@@ -14,6 +14,7 @@ import java.util.List;
 public class IngressSpecModel extends Model {
 	
 	private List<Rule> rules = new LinkedList<>();
+	private List<Tls> tls = new LinkedList<>();
 	
 	public List<Rule> getRules() {
 		return rules;
@@ -21,6 +22,14 @@ public class IngressSpecModel extends Model {
 
 	public void setRules(List<Rule> rules) {
 		this.rules = rules;
+	}
+
+	public List<Tls> getTls() {
+		return tls;
+	}
+
+	public void setTls(List<Tls> tls) {
+		this.tls = tls;
 	}
 
 	public static class Rule extends Model {
@@ -102,6 +111,29 @@ public class IngressSpecModel extends Model {
 		
 		public void setServicePort(Integer servicePort) {
 			this.servicePort = servicePort;
+		}
+		
+	}
+	
+	public static class Tls extends Model {
+		
+		private List<String> hosts = new LinkedList<>();
+		private String secretName;
+		
+		public List<String> getHosts() {
+			return hosts;
+		}
+		
+		public void setHosts(List<String> hosts) {
+			this.hosts = hosts;
+		}
+
+		public String getSecretName() {
+			return secretName;
+		}
+
+		public void setSecretName(String secretName) {
+			this.secretName = secretName;
 		}
 		
 	}

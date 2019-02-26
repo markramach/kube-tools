@@ -3,6 +3,7 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.flyover.kube.tools.connector.model.IngressModel;
@@ -11,6 +12,7 @@ import com.flyover.kube.tools.connector.model.IngressSpecModel.BackendModel;
 import com.flyover.kube.tools.connector.model.IngressSpecModel.Http;
 import com.flyover.kube.tools.connector.model.IngressSpecModel.Path;
 import com.flyover.kube.tools.connector.model.IngressSpecModel.Rule;
+import com.flyover.kube.tools.connector.model.IngressSpecModel.Tls;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 
 /**
@@ -105,6 +107,23 @@ public class Ingress {
 			this.model.getRules().add(r);
 			
 			return new RuleSpec(r);
+			
+		}
+			
+		public IngressSpec clearTls() {
+			model.getTls().clear();
+			return this;
+		}
+		
+		public IngressSpec tls(String secretName, String...hosts) {
+			
+			Tls tls = new Tls();
+			tls.setSecretName(secretName);
+			tls.setHosts(Arrays.asList(hosts));
+			
+			this.model.getTls().add(tls);
+			
+			return this;
 			
 		}
 		
