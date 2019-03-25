@@ -112,6 +112,18 @@ public class Container {
 		
 	}
 	
+	public Container volumeMount(String name, String mountPath) {
+		
+		VolumeMountModel vm = new VolumeMountModel();
+		vm.setName(name);
+		vm.setMountPath(mountPath);
+		
+		model.getVolumeMounts().add(vm);
+		
+		return this;
+		
+	}
+	
 	public Container env(String name, String key, Secret secret) {
 		
 		SecretKeyRefModel secretKeyRef = new SecretKeyRefModel();

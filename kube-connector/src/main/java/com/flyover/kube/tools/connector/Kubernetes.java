@@ -43,6 +43,8 @@ import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
 import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
+import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
+import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel.SecretModel;
 
 /**
  * @author mramach
@@ -143,6 +145,17 @@ public class Kubernetes {
 		
 		EmptyDirVolumeModel model = new EmptyDirVolumeModel();
 		model.setName(alias);
+		
+		return new Volume(model);
+		
+	}
+	
+	public Volume secretVolume(String alias, String secretName) {
+		
+		SecretVolumeModel model = new SecretVolumeModel();
+		model.setName(alias);
+		model.setSecretModel(new SecretModel());
+		model.getSecret().setSecretName(secretName);
 		
 		return new Volume(model);
 		
