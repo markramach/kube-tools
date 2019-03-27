@@ -13,6 +13,7 @@ public class PortTargetModel extends Model {
 	private String protocol;
 	private int port;
 	private int targetPort;
+	private int nodePort;
 	
 	public String getProtocol() {
 		return protocol;
@@ -44,6 +45,14 @@ public class PortTargetModel extends Model {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getNodePort() {
+		return nodePort;
+	}
+
+	public void setNodePort(int nodePort) {
+		this.nodePort = nodePort;
 	}
 	
 }
