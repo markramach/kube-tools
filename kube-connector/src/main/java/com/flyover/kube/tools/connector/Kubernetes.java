@@ -126,6 +126,15 @@ public class Kubernetes {
 		
 	}
 	
+	public KubernetesNode node(String name) {
+		
+		KubernetesNode n = new KubernetesNode(this);
+		n.metadata().setName(name);
+		
+		return n;
+		
+	}
+	
 	public Volume volume(String namespace, String name, String alias) {
 		
 		return config.getStorageProvider().build(this, namespace, name, alias);
@@ -212,6 +221,12 @@ public class Kubernetes {
 	public <T extends KubeModel> T find(T model) {
 
 		return find(uri(model, resource(model)), model);
+		
+	}
+	
+	public <T extends KubeModel> T patch(T model, Map<Object, Object> patch) {
+
+		return patch(uri(model, resource(model)), model, patch);
 		
 	}
 	
@@ -423,6 +438,25 @@ public class Kubernetes {
 		try {
 			
 			return (T) restTemplate.getForObject(uri, model.getClass());
+			
+		} catch (HttpClientErrorException e) {
+			
+			if(HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
+				return null;
+			}
+			
+			throw e;
+			
+		}
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends KubeModel> T patch(URI uri, T model, Map<Object, Object> patch) {
+
+		try {
+			
+			return (T) restTemplate.patchForObject(uri, patch, model.getClass());
 			
 		} catch (HttpClientErrorException e) {
 			
