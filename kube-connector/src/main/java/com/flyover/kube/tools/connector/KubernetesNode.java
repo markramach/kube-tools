@@ -48,6 +48,8 @@ public class KubernetesNode {
 
 	public KubernetesNode cordon() {
 		
+		this.model.getSpec().any().put("unschedulable", true);
+		
 		Map<Object, Object> patch = new LinkedHashMap<Object, Object>();
 		patch.put("spec", Collections.singletonMap("unschedulable", true));
 		

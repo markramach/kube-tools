@@ -27,8 +27,10 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -250,6 +252,13 @@ public class Kubernetes {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T extends KubeModel> List<T> listAllNamespaces(T model, ListSelector selectors) {
+		
+		return (List<T>) list(model.getClass(), uri(model, resource(model), true, true), selectors);
+		
+	}
+	
 	public String exec(PodModel model, String command) {
 		
 		UriComponentsBuilder builder = UriComponentsBuilder
@@ -399,7 +408,7 @@ public class Kubernetes {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T extends KubeModel> T create(URI uri, T model, Callback<T> c) {
+	protected <T extends KubeModel> T create(URI uri, T model, Callback<T> c) {
 
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
 		
@@ -456,7 +465,64 @@ public class Kubernetes {
 
 		try {
 			
-			return (T) restTemplate.patchForObject(uri, patch, model.getClass());
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", "application/strategic-merge-patch+json");
+			headers.set("Accept", "application/json, */*");
+			HttpEntity<String> entity = new HttpEntity<>(new ObjectMapper().writeValueAsString(patch), headers);
+			
+			return (T) restTemplate.exchange(uri, HttpMethod.PATCH, entity, model.getClass()).getBody();
+			
+		} catch (HttpClientErrorException e) {
+			
+			System.out.println(e.getResponseBodyAsString());
+			
+			if(HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
+				return null;
+			}
+			
+			throw e;
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			throw new RuntimeException(e);
+			
+		}
+		
+	}
+
+	private <T extends KubeModel> List<T> list(Class<T> type, URI uri, ListSelector selectors) {
+
+		try {
+			
+			String labelSelector = selectors.getLabelSelectors().entrySet().stream()
+				.map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+				.collect(Collectors.joining(","));
+			
+			String fieldSelector = selectors.getFieldSelectors().entrySet().stream()
+					.map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+					.collect(Collectors.joining(","));
+			
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uri);
+			
+			if(StringUtils.hasText(labelSelector)) {
+				builder = builder.queryParam("labelSelector", labelSelector);
+			}
+			
+			if(StringUtils.hasText(fieldSelector)) {
+				builder = builder.queryParam("fieldSelector", fieldSelector);
+			}
+			
+			URI uriFull = builder.build().toUri();
+			
+			GenericKubeItemsModel items = restTemplate
+					.getForObject(uriFull, GenericKubeItemsModel.class);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			return items.getItems().stream()
+				.map(i -> mapper.convertValue(i, type))
+					.collect(Collectors.toList());
 			
 		} catch (HttpClientErrorException e) {
 			

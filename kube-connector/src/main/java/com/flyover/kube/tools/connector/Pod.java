@@ -3,8 +3,13 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.net.URI;
+
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.flyover.kube.tools.connector.model.EvictionModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
+import com.flyover.kube.tools.connector.model.KubeModel;
 import com.flyover.kube.tools.connector.model.PodModel;
 
 /**
@@ -53,11 +58,22 @@ public class Pod {
 	
 	public Pod evict() {
 		
-		EvictionModel ev = new EvictionModel();
+		KubeModel ev = new EvictionModel();
 		ev.getMetadata().setNamespace(metadata().getNamespace());
 		ev.getMetadata().setName(metadata().getName());
 		
-		kube.create(ev);
+		URI uri = UriComponentsBuilder
+    			.fromHttpUrl(kube.getConfig().getEndpoint())
+    			.path("api/v1/namespaces/")
+    			.path(metadata().getNamespace())
+    			.path("/pods/")
+    			.path(metadata().getName())
+    			.path("/eviction")
+    			.build()
+    				.toUri();
+			
+		// this is a special case
+		kube.create(uri, ev, new Callback<KubeModel>() { });
 		
 		return find();
 		

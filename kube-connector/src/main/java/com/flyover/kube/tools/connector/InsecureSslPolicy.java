@@ -4,7 +4,9 @@
 package com.flyover.kube.tools.connector;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
@@ -17,6 +19,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -39,7 +42,54 @@ public class InsecureSslPolicy implements SslPolicy {
 				prepareHttpsConnection((HttpsURLConnection) connection);
 			}
 			
-			super.prepareConnection(connection, httpMethod);
+			try {
+				
+				super.prepareConnection(connection, httpMethod);
+				
+			} catch (ProtocolException e) {
+
+				/*
+				 * This is really dumb. The native HttpUrlConnection in the jvm
+				 * doesn't support the PATCH method. To get aroudn this, rather
+				 * than rip out all the connection prep, I've udpated the field
+				 * via reflection. 
+				 */
+				
+				if("PATCH".equalsIgnoreCase(httpMethod)) {
+
+					try {
+						
+						// set the method field to PATCH
+						Field field = ReflectionUtils.findField(connection.getClass(), "method");
+						field.setAccessible(true);
+						field.set(connection, httpMethod);
+						
+						field = ReflectionUtils.findField(connection.getClass(), "delegate");
+						
+						/*
+						 * If this is an SSL connection the connection is a wrapper and
+						 * we need to update the delegate connection in the object.
+						 */
+						
+						if(field != null) {
+						
+							field.setAccessible(true);
+							// get the delegate target
+							Object delegate = field.get(connection);
+							// set the method field to PATCH
+							field = ReflectionUtils.findField(delegate.getClass(), "method");
+							field.setAccessible(true);
+							field.set(delegate, httpMethod);
+							
+						}
+						
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					
+				}
+				
+			}
 			
 		}
 
