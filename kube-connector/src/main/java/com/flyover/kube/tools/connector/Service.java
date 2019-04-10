@@ -104,6 +104,12 @@ public class Service {
 			
 		}
 		
+		public ServiceSpec tcpPort(int port, int nodeport) {
+			
+			return tcpPort("port-" + String.valueOf(model.getPorts().size()), port, nodeport);
+			
+		}
+		
 		public ServiceSpec tcpPort(String name, int port) {
 			
 			PortTargetModel p = new PortTargetModel();
@@ -111,6 +117,21 @@ public class Service {
 			p.setProtocol("TCP");
 			p.setPort(port);
 			p.setTargetPort(port);
+			
+			model.getPorts().add(p);
+			
+			return this;
+			
+		}
+		
+		public ServiceSpec tcpPort(String name, int port, int nodeport) {
+			
+			PortTargetModel p = new PortTargetModel();
+			p.setName(name);
+			p.setProtocol("TCP");
+			p.setPort(port);
+			p.setTargetPort(port);
+			p.setNodePort(nodeport);
 			
 			model.getPorts().add(p);
 			

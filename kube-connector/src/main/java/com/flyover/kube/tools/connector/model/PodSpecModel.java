@@ -18,6 +18,7 @@ public class PodSpecModel extends Model {
 	private List<VolumeModel> volumes = new LinkedList<>();
 	private List<ImagePullSecretModel> imagePullSecrets = new LinkedList<>();
 	private Map<String, String> nodeSelector;
+	private boolean hostNetwork = false;
 
 	public List<ContainerModel> getContainers() {
 		return containers;
@@ -57,6 +58,14 @@ public class PodSpecModel extends Model {
 
 	public void setServiceAccount(String serviceAccount) {
 		this.serviceAccount = serviceAccount;
+	}
+
+	public boolean isHostNetwork() {
+		return hostNetwork;
+	}
+
+	public void setHostNetwork(boolean hostNetwork) {
+		this.hostNetwork = hostNetwork;
 	}
 
 	public static class ImagePullSecretModel extends Model {

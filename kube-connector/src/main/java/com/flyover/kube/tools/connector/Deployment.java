@@ -59,6 +59,11 @@ public class Deployment {
 		this.spec().template().podSpec().volumes(v);
 		return this;
 	}
+
+	public Deployment hostNetwork() {
+		this.spec().template().podSpec().hostNetwork();
+		return this;
+	}
 	
 	public Deployment serviceAccount(String sa) {
 		this.spec().template().podSpec().serviceAccount(sa);

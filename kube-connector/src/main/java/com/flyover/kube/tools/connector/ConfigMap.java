@@ -1,9 +1,9 @@
 package com.flyover.kube.tools.connector;
 
+import java.util.Map;
+
 import com.flyover.kube.tools.connector.model.ConfigMapModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
-
-import java.util.Map;
 
 public class ConfigMap {
     private Kubernetes kube;
@@ -54,4 +54,9 @@ public class ConfigMap {
 
         return create();
     }
+    
+	public void delete() {
+	    kube.delete(this.model);
+    }
+	
 }

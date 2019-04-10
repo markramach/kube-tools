@@ -49,6 +49,14 @@ public class PodSpec {
 		
 	}
 	
+	public PodSpec hostNetwork() {
+		
+		this.model.setHostNetwork(true);
+		
+		return this;
+		
+	}
+	
 	public PodSpec serviceAccount(String sa) {
 		
 		this.model.setServiceAccount(sa);

@@ -34,6 +34,38 @@ public class RoleBinding {
 		return this;
 		
 	}
+	
+	public RoleBinding find() {
+		
+		this.model = kube.find(this.model);
+		
+		if(this.model == null) {
+			return null;
+		}
+		
+		return this;
+		
+	}
+	
+	public RoleBinding merge() {
+		
+		RoleBindingModel found = kube.find(this.model);
+		
+		if(found == null) {
+			this.model = kube.create(this.model);
+		} else {
+			this.model = kube.update(found, this.model);
+		}
+		
+		return this;
+		
+	}
+	
+	public void delete() {
+		
+		kube.delete(this.model);
+		
+	}
 
 	public RoleBinding roleRef(Role role) {
 		

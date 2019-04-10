@@ -3,8 +3,13 @@
  */
 package com.flyover.kube.tools.connector.model;
 
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -20,6 +25,32 @@ public class RoleModel extends KubeModel {
 		setKind("Role");
 	}	
 	
+	@Override
+	public <T extends KubeModel> void merge(T model) {
+		
+		RoleModel r = (RoleModel)model;
+		
+		super.merge(model);
+		setRules(r.getRules());
+		
+	}
+
+	@Override
+	public String checksum() {
+		
+		try {
+		
+			String data = new ObjectMapper().writeValueAsString(rules);
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			
+			return new String(Base64.getEncoder().encodeToString(md.digest(data.getBytes())));
+			
+		} catch (Exception e) {
+			throw new RuntimeException("failed to create checksum", e);
+		}
+		
+	}
+	
 	public List<RuleModel> getRules() {
 		return rules;
 	}
@@ -28,9 +59,11 @@ public class RoleModel extends KubeModel {
 		this.rules = rules;
 	}
 
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	public static class RuleModel extends Model {
 		
 		private List<String> apiGroups = new LinkedList<>();
+		private List<String> resourceNames = new LinkedList<>();
 		private List<String> resources = new LinkedList<>();
 		private List<String> verbs = new LinkedList<>();
 		
@@ -56,6 +89,14 @@ public class RoleModel extends KubeModel {
 
 		public void setVerbs(List<String> verbs) {
 			this.verbs = verbs;
+		}
+
+		public List<String> getResourceNames() {
+			return resourceNames;
+		}
+
+		public void setResourceNames(List<String> resourceNames) {
+			this.resourceNames = resourceNames;
 		}
 		
 	}

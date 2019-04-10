@@ -3,6 +3,8 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
@@ -36,10 +38,47 @@ public class Role {
 		
 	}
 	
+	public Role find() {
+		
+		this.model = kube.find(this.model);
+		
+		if(this.model == null) {
+			return null;
+		}
+		
+		return this;
+		
+	}
+	
+	public Role merge() {
+		
+		RoleModel found = kube.find(this.model);
+		
+		if(found == null) {
+			this.model = kube.create(this.model);
+		} else {
+			this.model = kube.update(found, this.model);
+		}
+		
+		return this;
+		
+	}
+	
+	public void delete() {
+		
+		kube.delete(this.model);
+		
+	}
+	
 	public Role rule(List<String> apiGroups, List<String> resources, List<String> verbs) {
+		return rule(apiGroups, Collections.emptyList(), resources, verbs);
+	}
+	
+	public Role rule(List<String> apiGroups, List<String> resourceNames, List<String> resources, List<String> verbs) {
 		
 		RuleModel rule = new RuleModel();
 		rule.setApiGroups(apiGroups);
+		rule.setResourceNames(resourceNames);
 		rule.setResources(resources);
 		rule.setVerbs(verbs);
 		
@@ -47,6 +86,10 @@ public class Role {
 		
 		return this;
 		
+	}
+	
+	public static List<String> l(String...values) {
+		return Arrays.asList(values);
 	}
 
 }

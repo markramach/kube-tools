@@ -3,8 +3,12 @@
  */
 package com.flyover.kube.tools.connector.model;
 
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -21,6 +25,34 @@ public class RoleBindingModel extends KubeModel {
 		setApiVersion("rbac.authorization.k8s.io/v1");
 		setKind("RoleBinding");
 	}	
+	
+	@Override
+	public <T extends KubeModel> void merge(T model) {
+		
+		RoleBindingModel r = (RoleBindingModel)model;
+		
+		super.merge(model);
+		setRoleRef(r.getRoleRef());
+		setSubjects(r.getSubjects());
+		
+	}
+
+	@Override
+	public String checksum() {
+		
+		try {
+		
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(new ObjectMapper().writeValueAsString(getRoleRef()).getBytes());
+			byte[] digest = md.digest(new ObjectMapper().writeValueAsString(getSubjects()).getBytes());
+			
+			return new String(Base64.getEncoder().encodeToString(digest));
+			
+		} catch (Exception e) {
+			throw new RuntimeException("failed to create checksum", e);
+		}
+		
+	}
 	
 	public RoleRefModel getRoleRef() {
 		return roleRef;

@@ -32,5 +32,23 @@ public class ServiceAccount {
 		return this;
 		
 	}
+	
+	public ServiceAccount find() {
+		
+		this.model = kube.find(this.model);
+		
+		if(this.model == null) {
+			return null;
+		}
+		
+		return this;
+		
+	}
+	
+	public void delete() {
+		
+		kube.delete(this.model);
+		
+	}
 
 }
