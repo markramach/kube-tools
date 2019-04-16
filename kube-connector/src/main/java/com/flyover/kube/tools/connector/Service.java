@@ -98,6 +98,17 @@ public class Service {
 			return this.model.getSelector();
 		}
 
+		public ServiceSpec udpPort(String name, int port) {
+			PortTargetModel p = new PortTargetModel();
+			p.setName(name);
+			p.setProtocol("UDP");
+			p.setPort(port);
+			p.setTargetPort(port);
+			model.getPorts().add(p);
+
+			return this;
+		}
+
 		public ServiceSpec tcpPort(int port) {
 			
 			return tcpPort("port-" + String.valueOf(model.getPorts().size()), port);
