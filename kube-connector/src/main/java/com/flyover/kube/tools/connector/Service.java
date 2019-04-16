@@ -98,12 +98,33 @@ public class Service {
 			return this.model.getSelector();
 		}
 
+		public ServiceSpec udpPort(int port) {
+			return udpPort("port-" + String.valueOf(model.getPorts().size()), port);
+		}
+
+		public ServiceSpec udpPort(int port, int nodeport) {
+			return udpPort("port-" + String.valueOf(model.getPorts().size()), port, nodeport);
+		}
+
 		public ServiceSpec udpPort(String name, int port) {
 			PortTargetModel p = new PortTargetModel();
 			p.setName(name);
 			p.setProtocol("UDP");
 			p.setPort(port);
 			p.setTargetPort(port);
+			model.getPorts().add(p);
+
+			return this;
+		}
+
+		public ServiceSpec udpPort(String name, int port, int nodeport) {
+			PortTargetModel p = new PortTargetModel();
+			p.setName(name);
+			p.setProtocol("UDP");
+			p.setPort(port);
+			p.setTargetPort(port);
+			p.setNodePort(nodeport);
+
 			model.getPorts().add(p);
 
 			return this;
