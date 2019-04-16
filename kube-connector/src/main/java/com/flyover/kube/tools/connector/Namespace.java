@@ -157,6 +157,22 @@ public class Namespace {
 		
 	}
 
+	public ClusterRole clusterRole(String name) {
+		ClusterRole clusterRole = new ClusterRole(kube);
+		clusterRole.metadata().setNamespace(metadata().getName());
+		clusterRole.metadata().setName(name);
+
+		return clusterRole;
+	}
+
+	public ClusterRoleBinding clusterRoleBinding(String name) {
+		ClusterRoleBinding clusterRoleBinding = new ClusterRoleBinding(kube);
+		clusterRoleBinding.metadata().setNamespace(metadata().getName());
+		clusterRoleBinding.metadata().setName(name);
+
+		return clusterRoleBinding;
+	}
+
 	public NetworkPolicy networkPolicy(String name) {
 		NetworkPolicy networkPolicy = new NetworkPolicy(kube);
 		networkPolicy.metadata().setNamespace(metadata().getName());
