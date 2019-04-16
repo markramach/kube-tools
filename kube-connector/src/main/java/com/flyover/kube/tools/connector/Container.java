@@ -72,6 +72,19 @@ public class Container {
 		model.getPorts().add(p);
 		
 		return this;
+		
+	}
+	
+	public Container udpPort(int port) {
+		
+		PortModel p = new PortModel();
+		p.setProtocol("UDP");
+		p.setContainerPort(port);
+		
+		model.getPorts().add(p);
+		
+		return this;
+		
 	}
 	
 	public Container readinessProbeTcp(int port, int initialDelaySeconds, int periodSeconds, int failureThreshold) {
