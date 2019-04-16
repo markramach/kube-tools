@@ -21,7 +21,12 @@ public class Secret {
 	private SecretModel model = new SecretModel();
 	
 	public Secret(Kubernetes kube) {
+		this(kube, new SecretModel());
+	}
+	
+	public Secret(Kubernetes kube, SecretModel model) {
 		this.kube = kube;
+		this.model = model;
 	}
 	
 	public KubeMetadataModel metadata() {
@@ -122,5 +127,9 @@ public class Secret {
 	public void delete() {
 	    kube.delete(this.model);
     }
+	
+	public SecretModel model() {
+		return this.model;
+	}
 
 }
