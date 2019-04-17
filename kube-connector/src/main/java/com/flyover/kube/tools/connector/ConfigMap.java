@@ -47,6 +47,20 @@ public class ConfigMap {
 
         return this;
     }
+    
+	public ConfigMap merge() {
+		
+		ConfigMapModel found = kube.find(this.model);
+		
+		if(found == null) {
+			this.model = kube.create(this.model);
+		} else {
+			this.model = kube.update(found, this.model);
+		}
+		
+		return this;
+		
+	}
 
     public ConfigMap replace() {
 

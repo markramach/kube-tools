@@ -60,6 +60,7 @@ public class ClusterRole {
         RuleModel rule = new RuleModel();
         rule.setApiGroups(apiGroups);
         rule.setResourceNames(resourceNames);
+        rule.setResources(resources);
         rule.setVerbs(verbs);
 
         this.model.getRules().add(rule);
