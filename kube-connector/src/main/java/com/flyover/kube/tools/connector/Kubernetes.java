@@ -44,6 +44,7 @@ import com.flyover.kube.tools.connector.model.ResourceListModel;
 import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
 import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
+import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel.ConfigMapItemModel;
 import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel.SecretModel;
@@ -667,17 +668,15 @@ public class Kubernetes {
 		
 	}
 
-	public Volume createConfigMapVolume(String alias) {
-		ConfigMapVolumeModel configMapVolumeModel = new ConfigMapVolumeModel();
+	public Volume createConfigMapVolume(String alias, ConfigMapItemModel...items) {
 
-		configMapVolumeModel.setName(alias);
-		configMapVolumeModel.setDefaultMode(420);
-		ConfigMapVolumeModel.KeyToPathModel keyToPathModel = new ConfigMapVolumeModel.KeyToPathModel();
-		keyToPathModel.setKey("config");
-		keyToPathModel.setPath(alias);
-		configMapVolumeModel.setItems(Arrays.asList(keyToPathModel));
+		ConfigMapVolumeModel v = new ConfigMapVolumeModel();
+		v.setName(alias);
+		v.getConfigMap().setName(alias);
+		v.getConfigMap().getItems().addAll(Arrays.asList(items));
 
-		return new Volume(configMapVolumeModel);
+		return new Volume(v);
+		
 	}
 	
 }

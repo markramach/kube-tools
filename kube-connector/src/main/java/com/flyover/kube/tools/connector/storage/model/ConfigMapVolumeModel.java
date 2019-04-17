@@ -1,32 +1,50 @@
 package com.flyover.kube.tools.connector.storage.model;
 
-import com.flyover.kube.tools.connector.model.VolumeModel;
-
+import java.util.LinkedList;
 import java.util.List;
 
+import com.flyover.kube.tools.connector.model.Model;
+import com.flyover.kube.tools.connector.model.VolumeModel;
+
 public class ConfigMapVolumeModel extends VolumeModel {
-    private Integer defaultMode = 420;
-    private List<KeyToPathModel> items = null;
+	
+	private ConfigMapModel configMap = new ConfigMapModel();
+	
+	public ConfigMapModel getConfigMap() {
+		return configMap;
+	}
 
-    public Integer getDefaultMode() {
-        return defaultMode;
-    }
+	public void setConfigMap(ConfigMapModel configMap) {
+		this.configMap = configMap;
+	}
 
-    public void setDefaultMode(Integer defaultMode) {
-        this.defaultMode = defaultMode;
-    }
+	public static class ConfigMapModel extends Model {
+		
+		private String name;
+		private List<ConfigMapItemModel> items = new LinkedList<>();
+		
+		public String getName() {
+			return name;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public List<ConfigMapItemModel> getItems() {
+			return items;
+		}
+		
+		public void setItems(List<ConfigMapItemModel> items) {
+			this.items = items;
+		}
+		
+	}
 
-    public List<KeyToPathModel> getItems() {
-        return items;
-    }
-
-    public void setItems(List<KeyToPathModel> items) {
-        this.items = items;
-    }
-
-    public static class KeyToPathModel{
-        private String key = null;
-        private String path = null;
+    public static class ConfigMapItemModel extends Model {
+    	
+        private String key;
+        private String path;
 
         public String getKey() {
             return key;
@@ -43,5 +61,6 @@ public class ConfigMapVolumeModel extends VolumeModel {
         public void setPath(String path) {
             this.path = path;
         }
+        
     }
 }
