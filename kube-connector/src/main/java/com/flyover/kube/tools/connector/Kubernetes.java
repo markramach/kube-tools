@@ -45,7 +45,9 @@ import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
 import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel.ConfigMapItemModel;
+import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel.HostPathModel;
 import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
+import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel.SecretModel;
 
@@ -168,6 +170,19 @@ public class Kubernetes {
 		model.setName(alias);
 		model.setSecretModel(new SecretModel());
 		model.getSecret().setSecretName(secretName);
+		
+		return new Volume(model);
+		
+	}
+	
+	public Volume hostPath(String alias, String hostPath) {
+		
+		HostPathModel path = new HostPathModel();
+		path.setPath(hostPath);
+		
+		HostPathVolumeModel model = new HostPathVolumeModel();
+		model.setName(alias);
+		model.setHostPath(path);
 		
 		return new Volume(model);
 		

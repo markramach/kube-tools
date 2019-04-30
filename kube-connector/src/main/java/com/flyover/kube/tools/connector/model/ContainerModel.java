@@ -10,6 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * @author mramach
  *
@@ -26,6 +29,8 @@ public class ContainerModel extends Model {
 	private Collection<String> args = new HashSet<>();
 	private ProbeModel readinessProbe;
 	private ResourceModel resources;
+	@JsonInclude(Include.NON_NULL)
+	private SecurityContextModel securityContext;
 
 	public String getName() {
 		return name;
@@ -107,6 +112,14 @@ public class ContainerModel extends Model {
 		this.resources = resources;
 	}
 
+	public SecurityContextModel getSecurityContext() {
+		return securityContext;
+	}
+
+	public void setSecurityContext(SecurityContextModel securityContext) {
+		this.securityContext = securityContext;
+	}
+
 	public static class ResourceModel extends Model {
 	
 		private Map<String, Object> limits = new LinkedHashMap<>();
@@ -126,6 +139,20 @@ public class ContainerModel extends Model {
 
 		public void setRequests(Map<String, Object> requests) {
 			this.requests = requests;
+		}
+		
+	}
+	
+	public static class SecurityContextModel extends Model {
+		
+		private boolean privileged;
+
+		public boolean isPrivileged() {
+			return privileged;
+		}
+
+		public void setPrivileged(boolean privileged) {
+			this.privileged = privileged;
 		}
 		
 	}

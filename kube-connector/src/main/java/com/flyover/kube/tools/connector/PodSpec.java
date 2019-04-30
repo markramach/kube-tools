@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel.ImagePullSecretModel;
+import com.flyover.kube.tools.connector.model.PodSpecModel.SeLinuxOptions;
+import com.flyover.kube.tools.connector.model.PodSpecModel.SecurityContextModel;
 
 /**
  * @author mramach
@@ -41,6 +43,14 @@ public class PodSpec {
 		
 	}
 	
+	public PodSpec initContainers(Container c) {
+		
+		this.model.getInitContainers().add(c.model());
+		
+		return this;
+		
+	}
+	
 	public PodSpec volumes(Volume v) {
 		
 		this.model.getVolumes().add(v.model());
@@ -57,6 +67,14 @@ public class PodSpec {
 		
 	}
 	
+	public PodSpec hostPID() {
+		
+		this.model.setHostPID(true);
+		
+		return this;
+		
+	}
+	
 	public PodSpec serviceAccount(String sa) {
 		
 		this.model.setServiceAccount(sa);
@@ -68,6 +86,14 @@ public class PodSpec {
 	public List<Container> containers() {
 		
 		return this.model.getContainers().stream()
+			.map(c -> new Container(c))
+				.collect(Collectors.toList());
+		
+	}
+	
+	public List<Container> initContainers() {
+		
+		return this.model.getInitContainers().stream()
 			.map(c -> new Container(c))
 				.collect(Collectors.toList());
 		
@@ -94,10 +120,35 @@ public class PodSpec {
 		
 	}
 	
+	public SecurityContext securityContext() {
+		
+		if(model.getSecurityContext() == null) {
+			model.setSecurityContext(new SecurityContextModel());
+		}
+		
+		return new SecurityContext(model.getSecurityContext());
+		
+	}
+	
 	public static class Builders {
 
 		public static Container container(String name) {
 			return new Container(new ContainerModel()).name(name);
+		}
+		
+	}
+
+	public static class SecurityContext {
+		
+		private SecurityContextModel model;
+
+		public SecurityContext(SecurityContextModel model) {
+			this.model = model;
+		}
+		
+		public SecurityContext seLinuxOptions(SeLinuxOptions options) {
+			this.model.setSeLinuxOptions(options);
+			return this;
 		}
 		
 	}

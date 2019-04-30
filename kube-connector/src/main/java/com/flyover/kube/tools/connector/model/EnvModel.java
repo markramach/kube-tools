@@ -44,7 +44,10 @@ public class EnvModel extends Model {
 
 	public static class ValueFromModel extends Model {
 		
+		@JsonInclude(Include.NON_NULL)
 		private SecretKeyRefModel secretKeyRef;
+		@JsonInclude(Include.NON_NULL)
+		private FieldRefModel fieldRef;
 
 		public SecretKeyRefModel getSecretKeyRef() {
 			return secretKeyRef;
@@ -52,6 +55,14 @@ public class EnvModel extends Model {
 
 		public void setSecretKeyRef(SecretKeyRefModel secretKeyRef) {
 			this.secretKeyRef = secretKeyRef;
+		}
+
+		public FieldRefModel getFieldRef() {
+			return fieldRef;
+		}
+
+		public void setFieldRef(FieldRefModel fieldRef) {
+			this.fieldRef = fieldRef;
 		}
 		
 	}
@@ -75,6 +86,29 @@ public class EnvModel extends Model {
 
 		public void setKey(String key) {
 			this.key = key;
+		}
+		
+	}
+	
+	public static class FieldRefModel extends Model {
+		
+		private String apiVersion;
+		private String fieldPath;
+		
+		public String getApiVersion() {
+			return apiVersion;
+		}
+		
+		public void setApiVersion(String apiVersion) {
+			this.apiVersion = apiVersion;
+		}
+
+		public String getFieldPath() {
+			return fieldPath;
+		}
+
+		public void setFieldPath(String fieldPath) {
+			this.fieldPath = fieldPath;
 		}
 		
 	}

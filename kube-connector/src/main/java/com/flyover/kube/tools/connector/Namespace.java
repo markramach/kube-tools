@@ -97,6 +97,17 @@ public class Namespace {
 		
 	}
 	
+	public Daemonset daemonset(String name) {
+		
+		Daemonset d = new Daemonset(kube);
+		d.metadata().setNamespace(this.model.getMetadata().getName());
+		d.metadata().setName(name);
+		d.spec().template().metadata().getLabels().put("key", name);
+		
+		return d;
+		
+	}
+	
 	public Service service(String name) {
 		
 		Service service = new Service(kube);

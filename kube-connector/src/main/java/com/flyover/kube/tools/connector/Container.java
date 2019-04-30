@@ -11,9 +11,12 @@ import java.util.Map;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.ContainerModel.ResourceModel;
+import com.flyover.kube.tools.connector.model.ContainerModel.SecurityContextModel;
 import com.flyover.kube.tools.connector.model.EnvModel;
+import com.flyover.kube.tools.connector.model.EnvModel.FieldRefModel;
 import com.flyover.kube.tools.connector.model.EnvModel.SecretKeyRefModel;
 import com.flyover.kube.tools.connector.model.EnvModel.ValueFromModel;
+import com.flyover.kube.tools.connector.model.HttpGetProbeModel;
 import com.flyover.kube.tools.connector.model.PortModel;
 import com.flyover.kube.tools.connector.model.TcpProbeModel;
 import com.flyover.kube.tools.connector.model.VolumeMountModel;
@@ -101,6 +104,22 @@ public class Container {
 		
 	}
 	
+	public Container readinessProbeHttpGet(String host, String path, int port, int initialDelaySeconds, int periodSeconds, int failureThreshold) {
+		
+		HttpGetProbeModel probe = new HttpGetProbeModel();
+		probe.getHttpGet().setHost(host);
+		probe.getHttpGet().setPath(path);
+		probe.getHttpGet().setPort(port);
+		probe.setInitialDelaySeconds(initialDelaySeconds);
+		probe.setPeriodSeconds(periodSeconds);
+		probe.setFailureThreshold(failureThreshold);
+		
+		model.setReadinessProbe(probe);
+		
+		return this;
+		
+	}
+	
 	public Container env(String name, String value) {
 		
 		EnvModel e = new EnvModel();
@@ -163,6 +182,25 @@ public class Container {
 		return this;
 	}
 	
+	public Container env(String name, String apiVersion, String fieldPath) {
+		
+		FieldRefModel ref = new FieldRefModel();
+		ref.setApiVersion(apiVersion);
+		ref.setFieldPath(fieldPath);
+		
+		ValueFromModel valueFrom = new ValueFromModel();
+		valueFrom.setFieldRef(ref);
+
+		EnvModel e = new EnvModel();
+		e.setName(name);
+		e.setValueFrom(valueFrom);
+		
+		model.getEnv().add(e);
+		
+		return this;
+		
+	}
+	
 	public Resources resources() {
 		
 		if(model.getResources() == null) {
@@ -170,6 +208,16 @@ public class Container {
 		}
 		
 		return new Resources(model.getResources());
+		
+	}
+	
+	public SecurityContext securityContext() {
+		
+		if(model.getSecurityContext() == null) {
+			model.setSecurityContext(new SecurityContextModel());
+		}
+		
+		return new SecurityContext(model.getSecurityContext());
 		
 	}
 
@@ -210,6 +258,21 @@ public class Container {
 			return Collections.singletonMap("memory", value);
 		}
 
+	}
+	
+	public static class SecurityContext {
+		
+		private SecurityContextModel model;
+
+		public SecurityContext(SecurityContextModel model) {
+			this.model = model;
+		}
+		
+		public SecurityContext privileged(boolean isPrivileged) {
+			this.model.setPrivileged(isPrivileged);
+			return this;
+		}
+		
 	}
 
 }
