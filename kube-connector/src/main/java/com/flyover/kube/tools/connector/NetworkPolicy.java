@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
+import com.flyover.kube.tools.connector.model.NetworkPolicyEgressRuleModel;
 import com.flyover.kube.tools.connector.model.NetworkPolicyIngressRuleModel;
 import com.flyover.kube.tools.connector.model.NetworkPolicyIngressRuleModel.Port;
-import com.flyover.kube.tools.connector.model.IngressModel;
 import com.flyover.kube.tools.connector.model.NetworkPolicyModel;
 import com.flyover.kube.tools.connector.model.NetworkPolicySpecModel;
 import com.flyover.kube.tools.connector.model.SelectorModel;
@@ -98,6 +98,14 @@ public class NetworkPolicy {
         	return new Ingress(this.model.getIngress());
         	
         }
+        
+        public Egress egress() {
+        	
+        	this.model.setEgress(new LinkedList<>());
+        	
+        	return new Egress(this.model.getEgress());
+        	
+        }
 
     }
     
@@ -123,7 +131,7 @@ public class NetworkPolicy {
 			this.model = model;
 		}
     	
-		public Rule from(FromType...types) {
+		public IngressRule from(FromType...types) {
 			
 			NetworkPolicyIngressRuleModel rule = new NetworkPolicyIngressRuleModel();
 			
@@ -133,7 +141,7 @@ public class NetworkPolicy {
 			
 			this.model.add(rule);
 			
-			return new Rule(rule);
+			return new IngressRule(rule);
 			
 		}
 		
@@ -147,15 +155,51 @@ public class NetworkPolicy {
 		
     }
     
-    public static class Rule {
+    public static class Egress {
     	
-    	private NetworkPolicyIngressRuleModel model;
+    	private List<NetworkPolicyEgressRuleModel> model;
 
-		public Rule(NetworkPolicyIngressRuleModel model) {
+		public Egress(List<NetworkPolicyEgressRuleModel> model) {
 			this.model = model;
 		}
     	
-		public Rule port(String protocol, int port) {
+		public EgressRule to(ToType...types) {
+			
+			NetworkPolicyEgressRuleModel rule = new NetworkPolicyEgressRuleModel();
+			
+			Arrays.asList(types).forEach(t -> {
+				rule.getTo().add(t.model());
+			});
+			
+			this.model.add(rule);
+			
+			return new EgressRule(rule);
+			
+		}
+		
+		public static NamespaceSelector namespaceSelector() {
+			return new NamespaceSelector();
+		}
+		
+		public static AllPodsInNamespace allPodsInNamespace() {
+			return new AllPodsInNamespace();
+		}
+		
+		public static IPBlock ipBlock() {
+			return new IPBlock();
+		}
+		
+    }
+    
+    public static class IngressRule {
+    	
+    	private NetworkPolicyIngressRuleModel model;
+
+		public IngressRule(NetworkPolicyIngressRuleModel model) {
+			this.model = model;
+		}
+    	
+		public IngressRule port(String protocol, int port) {
 			
 			Port p = new Port();
 			p.setProtocol(protocol);
@@ -207,6 +251,66 @@ public class NetworkPolicy {
 		public Map<String, Object> model() {
 			
 			return Collections.singletonMap("podSelector", Collections.emptyMap());
+			
+		}
+    	
+    }
+    
+    public static class EgressRule {
+    	
+    	private NetworkPolicyEgressRuleModel model;
+
+		public EgressRule(NetworkPolicyEgressRuleModel model) {
+			this.model = model;
+		}
+    	
+		public EgressRule port(String protocol, int port) {
+			
+			NetworkPolicyEgressRuleModel.Port p = new NetworkPolicyEgressRuleModel.Port();
+			p.setProtocol(protocol);
+			p.setPort(port);
+			
+			if(model.getPorts() == null) {
+				model.setPorts(new LinkedList<>());
+			}
+			
+			model.getPorts().add(p);
+			
+			return this;
+			
+		}
+		
+    }
+    
+    public static interface ToType {
+    	
+    	Map<String, Object> model();
+    	
+    }
+    
+    public static class IPBlock implements ToType {
+    	
+    	private String cidr;
+    	private List<String> except = new LinkedList<>();
+    	
+    	public IPBlock cidr(String cidr) {
+    		this.cidr = cidr;
+    		return this;
+		}
+    	
+    	public IPBlock except(String...cidr) {
+    		this.except.addAll(Arrays.asList(cidr));
+    		return this;
+		}
+    	
+		@Override
+		public Map<String, Object> model() {
+			
+			Map<String, Object> value = new LinkedHashMap<>();
+			value.put("cidr", cidr);
+			value.put("except", except);
+			
+			return Collections.singletonMap("ipBlock", value);
 			
 		}
     	

@@ -6,6 +6,7 @@ public class NetworkPolicySpecModel extends Model {
 
     private SelectorModel podSelector;
     private List<NetworkPolicyIngressRuleModel> ingress;
+    private List<NetworkPolicyEgressRuleModel> egress;
 
     public SelectorModel getPodSelector() {
         return podSelector;
@@ -22,5 +23,13 @@ public class NetworkPolicySpecModel extends Model {
     public void setIngress(List<NetworkPolicyIngressRuleModel> ingress) {
         this.ingress = ingress;
     }
+
+	public List<NetworkPolicyEgressRuleModel> getEgress() {
+		return egress;
+	}
+
+	public void setEgress(List<NetworkPolicyEgressRuleModel> egress) {
+		this.egress = egress;
+	}
 
 }
