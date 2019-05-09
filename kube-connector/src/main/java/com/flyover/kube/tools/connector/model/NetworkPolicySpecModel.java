@@ -1,10 +1,17 @@
 package com.flyover.kube.tools.connector.model;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_EMPTY)
 public class NetworkPolicySpecModel extends Model {
 
     private SelectorModel podSelector;
+    private Set<String> policyTypes = new LinkedHashSet<>();
     private List<NetworkPolicyIngressRuleModel> ingress;
     private List<NetworkPolicyEgressRuleModel> egress;
 
@@ -30,6 +37,14 @@ public class NetworkPolicySpecModel extends Model {
 
 	public void setEgress(List<NetworkPolicyEgressRuleModel> egress) {
 		this.egress = egress;
+	}
+
+	public Set<String> getPolicyTypes() {
+		return policyTypes;
+	}
+
+	public void setPolicyTypes(Set<String> policyTypes) {
+		this.policyTypes = policyTypes;
 	}
 
 }

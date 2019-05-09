@@ -93,6 +93,7 @@ public class NetworkPolicy {
 
         public Ingress ingress() {
         	
+        	this.model.getPolicyTypes().add("Ingress");
         	this.model.setIngress(new LinkedList<>());
         	
         	return new Ingress(this.model.getIngress());
@@ -101,6 +102,7 @@ public class NetworkPolicy {
         
         public Egress egress() {
         	
+        	this.model.getPolicyTypes().add("Egress");
         	this.model.setEgress(new LinkedList<>());
         	
         	return new Egress(this.model.getEgress());
