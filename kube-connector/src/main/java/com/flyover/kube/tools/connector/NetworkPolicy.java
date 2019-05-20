@@ -155,6 +155,10 @@ public class NetworkPolicy {
 			return new AllPodsInNamespace();
 		}
 		
+		public static FromIPBlock ipBlock() {
+			return new FromIPBlock();
+		}
+		
     }
     
     public static class Egress {
@@ -301,6 +305,34 @@ public class NetworkPolicy {
 		}
     	
     	public IPBlock except(String...cidr) {
+    		this.except.addAll(Arrays.asList(cidr));
+    		return this;
+		}
+    	
+		@Override
+		public Map<String, Object> model() {
+			
+			Map<String, Object> value = new LinkedHashMap<>();
+			value.put("cidr", cidr);
+			value.put("except", except);
+			
+			return Collections.singletonMap("ipBlock", value);
+			
+		}
+    	
+    }
+    
+    public static class FromIPBlock implements FromType {
+    	
+    	private String cidr;
+    	private List<String> except = new LinkedList<>();
+    	
+    	public FromIPBlock cidr(String cidr) {
+    		this.cidr = cidr;
+    		return this;
+		}
+    	
+    	public FromIPBlock except(String...cidr) {
     		this.except.addAll(Arrays.asList(cidr));
     		return this;
 		}
