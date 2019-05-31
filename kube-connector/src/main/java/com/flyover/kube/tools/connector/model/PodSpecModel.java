@@ -25,6 +25,7 @@ public class PodSpecModel extends Model {
 	private Map<String, String> nodeSelector;
 	private boolean hostNetwork = false;
 	private boolean hostPID = false;
+	private String dnsPolicy = "ClusterFirst";
 	@JsonInclude(Include.NON_NULL)
 	private SecurityContextModel securityContext;
 
@@ -100,6 +101,14 @@ public class PodSpecModel extends Model {
 		this.securityContext = securityContext;
 	}
 
+	public String getDnsPolicy() {
+		return dnsPolicy;
+	}
+
+	public void setDnsPolicy(String dnsPolicy) {
+		this.dnsPolicy = dnsPolicy;
+	}
+
 	public static class ImagePullSecretModel extends Model {
 		
 		private String name;
@@ -113,11 +122,12 @@ public class PodSpecModel extends Model {
 		}
 		
 	}
-	
+
+	@JsonInclude(Include.NON_NULL)
 	public static class SecurityContextModel extends Model {
 		
-		@JsonInclude(Include.NON_NULL)
 		private SeLinuxOptions seLinuxOptions;
+		private Integer runAsUser;
 
 		public SeLinuxOptions getSeLinuxOptions() {
 			return seLinuxOptions;
@@ -125,6 +135,14 @@ public class PodSpecModel extends Model {
 
 		public void setSeLinuxOptions(SeLinuxOptions seLinuxOptions) {
 			this.seLinuxOptions = seLinuxOptions;
+		}
+
+		public Integer getRunAsUser() {
+			return runAsUser;
+		}
+
+		public void setRunAsUser(Integer runAsUser) {
+			this.runAsUser = runAsUser;
 		}
 		
 	}

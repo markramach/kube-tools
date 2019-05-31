@@ -50,7 +50,7 @@ public class Pod {
 		
 	}
 	
-	public String exec(String command) {
+	public String exec(String...command) {
 		
 		return kube.exec(model, command);
 		

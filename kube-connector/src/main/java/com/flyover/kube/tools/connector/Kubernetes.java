@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
@@ -45,10 +46,12 @@ import com.flyover.kube.tools.connector.model.ResourceModel;
 import com.flyover.kube.tools.connector.model.VersionModel;
 import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.ConfigMapVolumeModel.ConfigMapItemModel;
-import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel.HostPathModel;
 import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel;
+import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel.HostPathModel;
+import com.flyover.kube.tools.connector.storage.model.PersistentVolumeClaimVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
+import com.flyover.kube.tools.connector.storage.model.PersistentVolumeClaimVolumeModel.ClaimModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel.SecretModel;
 
 /**
@@ -69,11 +72,15 @@ public class Kubernetes {
 	public Kubernetes(KubernetesConfig config) {
 		
 		RestTemplate restTemplate = new RestTemplate();
+		Builder builder = new Builder();
 		// apply ssl policy
 		config.getSslPolicy().configure(restTemplate);
+		// apply ssl policy to web socket client
+		config.getSslPolicy().configure(builder);
 		// apply authenticator
 		config.getAuthenticator().configure(restTemplate);
 		
+		this.client = builder.build();
 		this.setRestTemplate(restTemplate);
 		this.setConfig(config);
 		
@@ -187,6 +194,19 @@ public class Kubernetes {
 		return new Volume(model);
 		
 	}
+	
+	public Volume persistentVolumeClaim(String alias, String claimName) {
+		
+		ClaimModel claim = new ClaimModel();
+		claim.setClaimName(claimName);
+		
+		PersistentVolumeClaimVolumeModel model = new PersistentVolumeClaimVolumeModel();
+		model.setName(alias);
+		model.setPersistentVolumeClaim(claim);
+		
+		return new Volume(model);
+		
+	}
 
 	public <T extends KubeModel> T create(T model) {
 		return create(model, new Callback<T>() {});
@@ -275,21 +295,25 @@ public class Kubernetes {
 		
 	}
 	
-	public String exec(PodModel model, String command) {
+	public String exec(PodModel model, String...command) {
 		
 		UriComponentsBuilder builder = UriComponentsBuilder
 				.fromUri(uri(model, resource(model)))
-				.path("/exec")
-				.queryParam("command", command)
-				.queryParam("stderr", true)
-				.queryParam("stdout", true);
+				.path("/exec");
+		
+		// append commands
+		Arrays.asList(command).forEach(cmd -> builder.queryParam("command", cmd));
+		
+		builder
+			.queryParam("stderr", "true")
+			.queryParam("stdout", "true");
 		
 		Request request = new Request.Builder()
 			.url(builder.build().toUri().toString())
 			.header("X-Stream-Protocol-Version", "v4.channel.k8s.io")
 			.header("X-Stream-Protocol-Version", "v3.channel.k8s.io")
 			.header("X-Stream-Protocol-Version", "v2.channel.k8s.io")
-			.header("X-Stream-Protocol-Version", "v.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "channel.k8s.io")
 				.build();
 		
 		CompletableFuture<String> promise = new CompletableFuture<>();

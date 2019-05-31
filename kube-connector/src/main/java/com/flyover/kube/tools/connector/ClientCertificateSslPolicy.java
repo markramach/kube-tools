@@ -26,6 +26,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
+import okhttp3.OkHttpClient.Builder;
+
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
@@ -49,6 +51,23 @@ public class ClientCertificateSslPolicy implements SslPolicy {
 	@Override
 	public void configure(RestTemplate restTemplate) {
 		restTemplate.setRequestFactory(new SkipCertVerificationClientHttpRequestFactory());
+	}
+	
+	@Override
+	public void configure(Builder client) {
+		
+		try {
+			
+			client.hostnameVerifier(new SkipHostnameVerifier());
+			
+			client.sslSocketFactory(
+				new SkipCertVerificationClientHttpRequestFactory().createSslSocketFactory(), 
+				new SkipX509TrustManager());
+			
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to initialize websocket client.", e);
+		}
+		
 	}
 	
 	private class SkipCertVerificationClientHttpRequestFactory extends SimpleClientHttpRequestFactory {

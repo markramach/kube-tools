@@ -3,6 +3,8 @@
  */
 package com.flyover.kube.tools.connector;
 
+import okhttp3.OkHttpClient.Builder;
+
 import org.springframework.web.client.RestTemplate;
 
 import com.flyover.kube.tools.connector.storage.HostPathStorageProvider;
@@ -56,6 +58,12 @@ public class KubernetesConfig {
 		@Override
 		public void configure(RestTemplate restTemplate) {
 			// do nothing
+		}
+
+		@Override
+		public void configure(Builder client) {
+			// do nothing
+			
 		}
 		
 	}

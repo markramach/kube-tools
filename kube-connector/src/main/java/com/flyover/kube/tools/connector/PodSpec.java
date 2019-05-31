@@ -83,6 +83,14 @@ public class PodSpec {
 		
 	}
 	
+	public PodSpec dnsPolicy(String policy) {
+		
+		this.model.setDnsPolicy(policy);
+		
+		return this;
+		
+	}
+	
 	public List<Container> containers() {
 		
 		return this.model.getContainers().stream()
@@ -148,6 +156,11 @@ public class PodSpec {
 		
 		public SecurityContext seLinuxOptions(SeLinuxOptions options) {
 			this.model.setSeLinuxOptions(options);
+			return this;
+		}
+		
+		public SecurityContext runAsUser(int runAsUser) {
+			this.model.setRunAsUser(runAsUser);
 			return this;
 		}
 		

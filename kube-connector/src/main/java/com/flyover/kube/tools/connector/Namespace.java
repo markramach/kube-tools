@@ -200,5 +200,24 @@ public class Namespace {
 
 		return configMap;
 	}
+	
+	public PersistentVolume persistentVolume(String name) {
+		
+		PersistentVolume pv = new PersistentVolume(kube);
+		pv.metadata().setName(name);
+
+		return pv;
+		
+	}
+	
+	public PersistentVolumeClaim persistentVolumeClaim(String name) {
+		
+		PersistentVolumeClaim pvc = new PersistentVolumeClaim(kube);
+		pvc.metadata().setNamespace(metadata().getName());
+		pvc.metadata().setName(name);
+
+		return pvc;
+		
+	}
 
 }
