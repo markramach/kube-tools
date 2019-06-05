@@ -102,6 +102,7 @@ public class Namespace {
 		Daemonset d = new Daemonset(kube);
 		d.metadata().setNamespace(this.model.getMetadata().getName());
 		d.metadata().setName(name);
+		d.spec().selector().getMatchLabels().put("key", name);
 		d.spec().template().metadata().getLabels().put("key", name);
 		
 		return d;

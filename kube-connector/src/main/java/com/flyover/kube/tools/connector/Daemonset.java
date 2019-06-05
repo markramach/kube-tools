@@ -3,7 +3,9 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.flyover.kube.tools.connector.PodSpec.SecurityContext;
 import com.flyover.kube.tools.connector.model.DaemonsetModel;
@@ -11,6 +13,8 @@ import com.flyover.kube.tools.connector.model.DaemonsetSpecModel;
 import com.flyover.kube.tools.connector.model.DaemonsetTemplateModel;
 import com.flyover.kube.tools.connector.model.DeploymentMetadataModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
+import com.flyover.kube.tools.connector.model.PodModel;
+import com.flyover.kube.tools.connector.model.SelectorModel;
 
 /**
  * @author mramach
@@ -148,6 +152,17 @@ public class Daemonset {
 		
 	}
 	
+	public List<Pod> pods() {
+		
+		PodModel model = new PodModel();
+		model.setMetadata(metadata());
+		
+		return kube.list(model, spec().selector().getMatchLabels()).stream()
+			.map(m -> new Pod(kube, m))
+				.collect(Collectors.toList());
+		
+	}
+	
 	public static class DaemonsetSpec {
 		
 		private DaemonsetSpecModel model;
@@ -158,6 +173,10 @@ public class Daemonset {
 
 		public DaemonsetTemplate template() {
 			return new DaemonsetTemplate(model.getTemplate());
+		}
+		
+		public SelectorModel selector() {
+			return this.model.getSelector();
 		}
 		
 	}
