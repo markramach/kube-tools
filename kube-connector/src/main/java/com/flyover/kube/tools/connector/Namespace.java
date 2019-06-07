@@ -221,4 +221,12 @@ public class Namespace {
 		
 	}
 
+	public Endpoint endpoint(String name) {
+		Endpoint ep = new Endpoint(kube);
+		ep.metadata().setNamespace(metadata().getName());
+		ep.metadata().setName(name);
+
+		return ep;
+	}
+
 }
