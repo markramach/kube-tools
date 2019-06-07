@@ -6,8 +6,7 @@ import com.flyover.kube.tools.connector.model.EndpointSubsetModel.EndpointAddres
 import com.flyover.kube.tools.connector.model.EndpointSubsetModel.EndpointPortModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 public class Endpoint {
 
@@ -17,14 +16,6 @@ public class Endpoint {
     public Endpoint(Kubernetes kube) { this.kube = kube; }
 
     public KubeMetadataModel metadata() { return this.model.getMetadata(); }
-
-    public Endpoint findOrCreate() {
-        EndpointModel found = kube.find(this.model);
-
-        this.model = found != null ? found : kube.create(this.model);
-
-        return this;
-    }
 
     public Endpoint find() {
         this.model = kube.find(this.model);
@@ -52,18 +43,50 @@ public class Endpoint {
         kube.delete(this.model);
     }
 
-    public Endpoint subset(List<EndpointAddressModel> addresses, List<EndpointPortModel> ports) {
-        EndpointModel subset = new EndpointModel();
+    public Subset subset() {
+        Optional<EndpointSubsetModel> subset =
+                this.model.getSubsets().stream().findFirst();
 
-        EndpointSubsetModel model = new EndpointSubsetModel();
-        model.setAddresses(addresses);
-        model.setPorts(ports);
+        return new Subset(subset.orElseGet(() -> {
+            EndpointSubsetModel subsetModel = new EndpointSubsetModel();
+            this.model.getSubsets().add(subsetModel);
 
-        subset.setSubsets(Arrays.asList(model));
+            return subsetModel;
+        }));
 
-        this.model.getSubsets().add(model);
+    }
 
-        return this;
+    public static class Subset {
+
+        private EndpointSubsetModel model;
+
+        public Subset(EndpointSubsetModel model)  {
+            this.model = model;
+        }
+
+        public Subset addAddress(String ip) {
+            EndpointAddressModel addressModel = new EndpointAddressModel();
+            addressModel.setIp(ip);
+
+            this.model.getAddresses().add(addressModel);
+
+            return this;
+        }
+
+        public Subset addPort(String name, int port, String protocol) {
+            EndpointPortModel portModel = new EndpointPortModel();
+            portModel.setName(name);
+            portModel.setPort(port);
+            portModel.setProtocol(protocol);
+
+            this.model.getPorts().add(portModel);
+
+            return this;
+        }
+
+        public EndpointSubsetModel model() {
+            return model;
+        }
     }
 
 }
