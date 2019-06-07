@@ -29,13 +29,10 @@ public class EndpointModel extends KubeModel {
     public String checksum() {
 
         try {
-
-            ObjectMapper mapper = new ObjectMapper();
-
+            String data = new ObjectMapper().writeValueAsString(subsets);
             MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(new ObjectMapper().writeValueAsString(getSubsets()).getBytes());
 
-            return new String(Base64.getEncoder().encodeToString(md.digest()));
+            return new String(Base64.getEncoder().encodeToString(md.digest(data.getBytes())));
 
         } catch (Exception e) {
             throw new RuntimeException("failed to create checksum", e);
