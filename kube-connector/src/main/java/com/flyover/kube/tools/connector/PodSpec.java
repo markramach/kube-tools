@@ -164,6 +164,11 @@ public class PodSpec {
 			return this;
 		}
 		
+		public SecurityContext fsGroup(int fsGroup) {
+			this.model.setFsGroup(fsGroup);
+			return this;
+		}
+		
 	}
 	
 }

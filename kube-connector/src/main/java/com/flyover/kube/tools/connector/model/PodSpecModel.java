@@ -128,6 +128,7 @@ public class PodSpecModel extends Model {
 		
 		private SeLinuxOptions seLinuxOptions;
 		private Integer runAsUser;
+		private Integer fsGroup;
 
 		public SeLinuxOptions getSeLinuxOptions() {
 			return seLinuxOptions;
@@ -143,6 +144,14 @@ public class PodSpecModel extends Model {
 
 		public void setRunAsUser(Integer runAsUser) {
 			this.runAsUser = runAsUser;
+		}
+
+		public Integer getFsGroup() {
+			return fsGroup;
+		}
+
+		public void setFsGroup(Integer fsGroup) {
+			this.fsGroup = fsGroup;
 		}
 		
 	}
