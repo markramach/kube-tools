@@ -106,6 +106,10 @@ public class Service {
 			return udpPort("port-" + String.valueOf(model.getPorts().size()), port, nodeport);
 		}
 
+		public ServiceSpec udpwithTargetPort(int port, int targetPort) {
+			return udpWithTargetPort("port-" + String.valueOf(model.getPorts().size()), port, targetPort);
+		}
+
 		public ServiceSpec udpPort(String name, int port) {
 			PortTargetModel p = new PortTargetModel();
 			p.setName(name);
@@ -130,6 +134,17 @@ public class Service {
 			return this;
 		}
 
+		public ServiceSpec udpWithTargetPort(String name, int port, int targetPort) {
+			PortTargetModel p = new PortTargetModel();
+			p.setName(name);
+			p.setProtocol("UDP");
+			p.setPort(port);
+			p.setTargetPort(targetPort);
+			model.getPorts().add(p);
+
+			return this;
+		}
+
 		public ServiceSpec tcpPort(int port) {
 			
 			return tcpPort("port-" + String.valueOf(model.getPorts().size()), port);
@@ -140,6 +155,12 @@ public class Service {
 			
 			return tcpPort("port-" + String.valueOf(model.getPorts().size()), port, nodeport);
 			
+		}
+
+		public ServiceSpec tcpWithTargetPort(int port, int targetPort) {
+
+			return tcpWithTargetPort("port-" + String.valueOf(model.getPorts().size()), port, targetPort);
+
 		}
 		
 		public ServiceSpec tcpPort(String name, int port) {
@@ -157,18 +178,32 @@ public class Service {
 		}
 		
 		public ServiceSpec tcpPort(String name, int port, int nodeport) {
-			
+
 			PortTargetModel p = new PortTargetModel();
 			p.setName(name);
 			p.setProtocol("TCP");
 			p.setPort(port);
 			p.setTargetPort(port);
 			p.setNodePort(nodeport);
-			
+
 			model.getPorts().add(p);
-			
+
 			return this;
-			
+
+		}
+
+		public ServiceSpec tcpWithTargetPort(String name, int port, int targetPort) {
+
+			PortTargetModel p = new PortTargetModel();
+			p.setName(name);
+			p.setProtocol("TCP");
+			p.setPort(port);
+			p.setTargetPort(targetPort);
+
+			model.getPorts().add(p);
+
+			return this;
+
 		}
 		
 		public ServiceSpec type(String type) {
