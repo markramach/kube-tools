@@ -110,6 +110,11 @@ public class CustomResourceDefinition {
 			return this;
 		}
 		
+		public Names listKind(String listKind) {
+			this.model.setListKind(listKind);
+			return this;
+		}
+		
 		public Names plural(String plural) {
 			this.model.setPlural(plural);
 			return this;

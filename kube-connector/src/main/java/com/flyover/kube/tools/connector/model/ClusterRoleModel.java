@@ -1,16 +1,20 @@
 package com.flyover.kube.tools.connector.model;
 
+import java.security.MessageDigest;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.security.MessageDigest;
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClusterRoleModel extends KubeModel {
 
-    List<RuleModel> rules = new LinkedList<>();
+    private List<RuleModel> rules = new LinkedList<>();
+    private AggregationRuleModel aggregationRule;
 
     public ClusterRoleModel() {
         setApiVersion("rbac.authorization.k8s.io/v1");
@@ -24,6 +28,7 @@ public class ClusterRoleModel extends KubeModel {
 
         super.merge(model);
         setRules(clusterRoleModel.getRules());
+        setAggregationRule(clusterRoleModel.getAggregationRule());
 
     }
 
@@ -31,11 +36,19 @@ public class ClusterRoleModel extends KubeModel {
     public String checksum() {
 
         try {
-
-            String data = new ObjectMapper().writeValueAsString(rules);
-            MessageDigest md = MessageDigest.getInstance("MD5");
-
-            return new String(Base64.getEncoder().encodeToString(md.digest(data.getBytes())));
+        	
+        	Map<String, String> annotations = new LinkedHashMap<>(getMetadata().getAnnotations());
+			// This value mutates as the spec mutates and should be ignored.
+			annotations.remove("com.flyover.checksum");
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(mapper.writeValueAsBytes(annotations));
+			md.update(mapper.writeValueAsBytes(rules));
+			md.update(mapper.writeValueAsBytes(aggregationRule));
+			
+			return new String(Base64.getEncoder().encodeToString(md.digest()));
 
         } catch (Exception e) {
             throw new RuntimeException("failed to create checksum", e);
@@ -51,7 +64,15 @@ public class ClusterRoleModel extends KubeModel {
         this.rules = rules;
     }
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public AggregationRuleModel getAggregationRule() {
+		return aggregationRule;
+	}
+
+	public void setAggregationRule(AggregationRuleModel aggregationRule) {
+		this.aggregationRule = aggregationRule;
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
     public static class RuleModel extends Model {
 
         private List<String> apiGroups = new LinkedList<>();
@@ -92,4 +113,35 @@ public class ClusterRoleModel extends KubeModel {
         }
 
     }
+    
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public static class AggregationRuleModel extends Model {
+    	
+    	private List<ClusterRoleSelectorModel> clusterRoleSelectors = new LinkedList<>();
+
+		public List<ClusterRoleSelectorModel> getClusterRoleSelectors() {
+			return clusterRoleSelectors;
+		}
+
+		public void setClusterRoleSelectors(List<ClusterRoleSelectorModel> clusterRoleSelectors) {
+			this.clusterRoleSelectors = clusterRoleSelectors;
+		}
+    	
+    }
+    
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public static class ClusterRoleSelectorModel extends Model {
+    	
+    	Map<String, Object> matchLabels = new LinkedHashMap<>();
+
+		public Map<String, Object> getMatchLabels() {
+			return matchLabels;
+		}
+
+		public void setMatchLabels(Map<String, Object> matchLabels) {
+			this.matchLabels = matchLabels;
+		}
+    	
+    }
+    
 }

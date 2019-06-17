@@ -8,6 +8,7 @@ import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -100,9 +101,11 @@ public class CustomResourceDefinitionModel extends KubeModel {
 		
 	}
 	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	public static class NamesModel extends Model {
 		
 		private String kind;
+		private String listKind;
 		private String plural;
 		private String singular;
 		private List<String> shortNames = new LinkedList<>();
@@ -137,6 +140,14 @@ public class CustomResourceDefinitionModel extends KubeModel {
 
 		public void setShortNames(List<String> shortNames) {
 			this.shortNames = shortNames;
+		}
+
+		public String getListKind() {
+			return listKind;
+		}
+
+		public void setListKind(String listKind) {
+			this.listKind = listKind;
 		}
 		
 	}

@@ -1,12 +1,15 @@
 package com.flyover.kube.tools.connector;
 
-import com.flyover.kube.tools.connector.model.ClusterRoleModel;
-import com.flyover.kube.tools.connector.model.ClusterRoleModel.RuleModel;
-import com.flyover.kube.tools.connector.model.KubeMetadataModel;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import com.flyover.kube.tools.connector.model.ClusterRoleModel;
+import com.flyover.kube.tools.connector.model.ClusterRoleModel.AggregationRuleModel;
+import com.flyover.kube.tools.connector.model.ClusterRoleModel.ClusterRoleSelectorModel;
+import com.flyover.kube.tools.connector.model.ClusterRoleModel.RuleModel;
+import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 
 public class ClusterRole {
 
@@ -67,8 +70,38 @@ public class ClusterRole {
 
         return this;
     }
+    
+    public AggregationRule aggregationRule() {
+    	
+    	if(this.model.getAggregationRule() == null) {
+    		this.model.setAggregationRule(new AggregationRuleModel());
+    	}
+    	
+    	return new AggregationRule(this.model.getAggregationRule());
+    	
+    }
 
     public static List<String> l(String...values) {
         return Arrays.asList(values);
+    }
+    
+    public static class AggregationRule {
+    	
+    	private AggregationRuleModel model;
+
+		public AggregationRule(AggregationRuleModel model) {
+			this.model = model;
+		}
+
+		public AggregationRule clusterRoleSelector(Map<String, Object> matchLabels) {
+			
+			ClusterRoleSelectorModel selectorModel = new ClusterRoleSelectorModel();
+			selectorModel.setMatchLabels(matchLabels);
+			
+			model.getClusterRoleSelectors().add(selectorModel);			
+			
+			return this;
+		}
+    	
     }
 }

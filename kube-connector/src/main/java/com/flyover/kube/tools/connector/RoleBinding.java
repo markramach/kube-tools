@@ -80,6 +80,19 @@ public class RoleBinding {
 		
 	}
 	
+	public RoleBinding clusterRoleRef(ClusterRole role) {
+		
+		RoleRefModel roleRef = new RoleRefModel();
+		roleRef.setApiGroup("rbac.authorization.k8s.io");
+		roleRef.setKind("ClusterRole");
+		roleRef.setName(role.metadata().getName());
+		
+		this.model.setRoleRef(roleRef);
+		
+		return this;
+		
+	}
+	
 	public RoleBinding subject(ServiceAccount sa) {
 		
 		SubjectModel subject = new SubjectModel();
