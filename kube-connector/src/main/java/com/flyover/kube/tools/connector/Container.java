@@ -6,7 +6,7 @@ package com.flyover.kube.tools.connector;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
@@ -53,7 +53,7 @@ public class Container {
 	}
 	
 	public Container args(String...args) {
-		this.model.setArgs(new HashSet<>(Arrays.asList(args)));
+		this.model.setArgs(new LinkedList<>(Arrays.asList(args)));
 		return this;
 	}
 	

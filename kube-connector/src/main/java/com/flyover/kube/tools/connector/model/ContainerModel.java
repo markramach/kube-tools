@@ -85,7 +85,7 @@ public class ContainerModel extends Model {
 	}
 
 	public void setArgs(Collection<String> args) {
-		this.args = new HashSet<>(args);
+		this.args = new LinkedList<>(args);
 	}
 
 	public List<VolumeMountModel> getVolumeMounts() {
