@@ -46,7 +46,10 @@ public class ClusterRoleModel extends KubeModel {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(mapper.writeValueAsBytes(annotations));
 			md.update(mapper.writeValueAsBytes(rules));
-			md.update(mapper.writeValueAsBytes(aggregationRule));
+			
+			if(aggregationRule != null) {
+				md.update(mapper.writeValueAsBytes(aggregationRule));
+			}
 			
 			return new String(Base64.getEncoder().encodeToString(md.digest()));
 

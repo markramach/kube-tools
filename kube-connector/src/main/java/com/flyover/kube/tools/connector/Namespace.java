@@ -35,6 +35,18 @@ public class Namespace {
 		return kube;
 	}
 
+	public Namespace find() {
+	
+		this.model = kube.find(this.model);
+		
+		if(this.model == null) {
+			return null;
+		}
+		
+		return this;
+		
+	}
+	
 	public Namespace create() {
 		
 		this.model = kube.create(this.model);
