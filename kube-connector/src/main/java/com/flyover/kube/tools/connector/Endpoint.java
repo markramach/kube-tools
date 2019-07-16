@@ -28,7 +28,8 @@ public class Endpoint {
     }
 
     public Endpoint merge() {
-        EndpointModel found = kube.find(this.model);
+        
+    	EndpointModel found = kube.find(this.model);
 
         if (found == null) {
             this.model = kube.create(this.model);
@@ -37,6 +38,21 @@ public class Endpoint {
         }
 
         return this;
+        
+    }
+    
+    public Endpoint activeMerge() {
+    	
+        EndpointModel found = kube.find(this.model);
+
+        if (found == null) {
+            this.model = kube.create(this.model);
+        } else {
+            this.model = kube.activeUpdate(found, this.model);
+        }
+
+        return this;
+        
     }
 
     public void delete() {

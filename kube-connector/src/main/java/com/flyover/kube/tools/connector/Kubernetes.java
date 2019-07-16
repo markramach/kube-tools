@@ -36,6 +36,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flyover.kube.tools.connector.model.GenericKubeItemsModel;
 import com.flyover.kube.tools.connector.model.KubeModel;
@@ -50,8 +51,8 @@ import com.flyover.kube.tools.connector.storage.model.EmptyDirVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.HostPathVolumeModel.HostPathModel;
 import com.flyover.kube.tools.connector.storage.model.PersistentVolumeClaimVolumeModel;
-import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.PersistentVolumeClaimVolumeModel.ClaimModel;
+import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel.SecretModel;
 
 /**
@@ -250,9 +251,19 @@ public class Kubernetes {
 		return update(existing, model, new Callback<T>() {});
 	}
 	
+	public <T extends KubeModel> T activeUpdate(T existing, T model) {
+		return activeUpdate(existing, model, new Callback<T>() {});
+	}
+	
 	public <T extends KubeModel> T update(T existing, T model, Callback<T> c) {
 
 		return update(uri(model, resource(model)), existing, model, c);
+		
+	}
+	
+	public <T extends KubeModel> T activeUpdate(T existing, T model, Callback<T> c) {
+
+		return activeUpdate(uri(model, resource(model)), existing, model, c);
 		
 	}
 	
@@ -447,10 +458,18 @@ public class Kubernetes {
 		
 	}
 	
+	private static ObjectMapper MAPPER = new ObjectMapper();
+	
 	@SuppressWarnings("unchecked")
 	protected <T extends KubeModel> T create(URI uri, T model, Callback<T> c) {
 
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
+		
+		try {
+			
+			System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			
+		} catch (JsonProcessingException e) {}
 		
 		T res = (T) restTemplate.postForObject(uri, model, model.getClass());
 		
@@ -472,6 +491,40 @@ public class Kubernetes {
 		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
 		
 		existing.merge(model);
+		
+		try {
+			
+			System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			
+		} catch (JsonProcessingException e) {}
+		
+		T res = (T) restTemplate.exchange(uri, HttpMethod.PUT, new HttpEntity<>(existing), model.getClass()).getBody();
+		
+		c.onUpdate(res);
+		
+		return res;
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends KubeModel> T activeUpdate(URI uri, T existing, T model, Callback<T> c) {
+
+		// using active checksum instead of annotation.
+		String checksum = ((T)existing).checksum();
+		
+		if(model.checksum().equals(checksum)) {
+			return existing;
+		}
+		
+		model.getMetadata().getAnnotations().put("com.flyover.checksum", model.checksum());
+		
+		existing.merge(model);
+		
+		try {
+			
+			System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			
+		} catch (JsonProcessingException e) {}
 		
 		T res = (T) restTemplate.exchange(uri, HttpMethod.PUT, new HttpEntity<>(existing), model.getClass()).getBody();
 		
@@ -650,7 +703,7 @@ public class Kubernetes {
 						String.format("could not determine api path for compoent with apiVersion %s and kind", 
 								model.getApiVersion(), model.getKind())));
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new RuntimeException("failed to load paths resource", e);
 		}
 		
