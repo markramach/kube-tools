@@ -55,6 +55,9 @@ import com.flyover.kube.tools.connector.storage.model.PersistentVolumeClaimVolum
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel;
 import com.flyover.kube.tools.connector.storage.model.SecretVolumeModel.SecretModel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author mramach
  *
@@ -65,6 +68,7 @@ public class Kubernetes {
 	private OkHttpClient client = new OkHttpClient();
 	private KubernetesConfig config;
 	private RestTemplate restTemplate;
+	Logger logger = LoggerFactory.getLogger(Kubernetes.class);
 
 	public Kubernetes() {
 		this(new KubernetesConfig());
@@ -467,7 +471,7 @@ public class Kubernetes {
 		
 		try {
 			
-			System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			logger.debug(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
 			
 		} catch (JsonProcessingException e) {}
 		
@@ -494,7 +498,7 @@ public class Kubernetes {
 		
 		try {
 			
-			System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			logger.debug(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
 			
 		} catch (JsonProcessingException e) {}
 		
@@ -522,7 +526,7 @@ public class Kubernetes {
 		
 		try {
 			
-			System.out.println(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
+			logger.debug(MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(model));
 			
 		} catch (JsonProcessingException e) {}
 		
@@ -567,7 +571,7 @@ public class Kubernetes {
 			
 		} catch (HttpClientErrorException e) {
 			
-			System.out.println(e.getResponseBodyAsString());
+			logger.error(e.getResponseBodyAsString());
 			
 			if(HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
 				return null;
