@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.flyover</groupId>
 		<artifactId>kube-tools</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
 	<artifactId>docker-connector</artifactId>
 	<name>docker-connector</name>
