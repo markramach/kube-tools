@@ -20,8 +20,12 @@ public class KubernetesNode {
 	private NodeModel model;
 
 	public KubernetesNode(Kubernetes kube) {
+		this(kube, new NodeModel());
+	}
+	
+	public KubernetesNode(Kubernetes kube, NodeModel model) {
 		this.kube = kube;
-		this.model = new NodeModel();
+		this.model = model;
 	}
 	
 	public KubeMetadataModel metadata() {
