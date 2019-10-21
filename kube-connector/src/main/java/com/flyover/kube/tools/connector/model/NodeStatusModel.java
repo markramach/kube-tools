@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class NodeStatusModel extends Model {
 
+	private NodeInfoModel nodeInfo;
 	private List<NodeConditionModel> conditions = new LinkedList<>();
 
 	public List<NodeConditionModel> getConditions() {
@@ -21,6 +22,14 @@ public class NodeStatusModel extends Model {
 
 	public void setConditions(List<NodeConditionModel> conditions) {
 		this.conditions = conditions;
+	}
+
+	public NodeInfoModel getNodeInfo() {
+		return nodeInfo;
+	}
+
+	public void setNodeInfo(NodeInfoModel nodeInfo) {
+		this.nodeInfo = nodeInfo;
 	}
 	
 }

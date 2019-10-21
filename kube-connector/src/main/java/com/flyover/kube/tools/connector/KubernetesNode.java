@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 import com.flyover.kube.tools.connector.model.NodeModel;
+import com.flyover.kube.tools.connector.model.NodeStatusModel;
 
 /**
  * @author mramach
@@ -30,6 +31,10 @@ public class KubernetesNode {
 	
 	public KubeMetadataModel metadata() {
 		return this.model.getMetadata();
+	}
+	
+	public NodeStatusModel status() {
+		return this.model.getStatus();
 	}
 	
 	public KubernetesNode find() {
