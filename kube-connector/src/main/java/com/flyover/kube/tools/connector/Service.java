@@ -106,7 +106,6 @@ public class Service {
 			return udpPort("port-" + String.valueOf(model.getPorts().size()), port, nodeport);
 		}
 
-
 		public ServiceSpec udpPort(String name, int port) {
 			PortTargetModel p = new PortTargetModel();
 			p.setName(name);
@@ -175,6 +174,10 @@ public class Service {
 		public ServiceSpec type(String type) {
 			this.model.setType(type);
 			return this;
+		}
+		
+		public ServiceSpecModel model() {
+			return this.model;
 		}
 		
 	}
