@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class PodSpecModel extends Model {
 
 	private String serviceAccount;
+	private AffinityModel affinity;
 	private List<ContainerModel> containers = new LinkedList<>();
 	@JsonInclude(Include.NON_NULL)
 	private List<ContainerModel> initContainers = new LinkedList<>();
@@ -28,6 +29,8 @@ public class PodSpecModel extends Model {
 	private String dnsPolicy = "ClusterFirst";
 	@JsonInclude(Include.NON_NULL)
 	private SecurityContextModel securityContext;
+	@JsonInclude(Include.NON_NULL)
+	private String hostname;
 
 	public List<ContainerModel> getContainers() {
 		return containers;
@@ -109,6 +112,22 @@ public class PodSpecModel extends Model {
 		this.dnsPolicy = dnsPolicy;
 	}
 
+	public AffinityModel getAffinity() {
+		return affinity;
+	}
+
+	public void setAffinity(AffinityModel affinity) {
+		this.affinity = affinity;
+	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+
 	public static class ImagePullSecretModel extends Model {
 		
 		private String name;
@@ -157,6 +176,67 @@ public class PodSpecModel extends Model {
 	}
 	
 	public static class SeLinuxOptions extends Model {
+		
+	}
+	
+	@JsonInclude(Include.NON_NULL)
+	public static class AffinityModel extends Model {
+		
+		private NodeAffinityModel nodeAffinity;
+
+		public NodeAffinityModel getNodeAffinity() {
+			return nodeAffinity;
+		}
+
+		public void setNodeAffinity(NodeAffinityModel nodeAffinity) {
+			this.nodeAffinity = nodeAffinity;
+		}
+		
+	}
+	
+	@JsonInclude(Include.NON_NULL)
+	public static class NodeAffinityModel extends Model {
+		
+		private RequiredDuringSchedulingIgnoredDuringExecutionModel requiredDuringSchedulingIgnoredDuringExecution;
+
+		public RequiredDuringSchedulingIgnoredDuringExecutionModel getRequiredDuringSchedulingIgnoredDuringExecution() {
+			return requiredDuringSchedulingIgnoredDuringExecution;
+		}
+
+		public void setRequiredDuringSchedulingIgnoredDuringExecution(
+				RequiredDuringSchedulingIgnoredDuringExecutionModel requiredDuringSchedulingIgnoredDuringExecution) {
+			this.requiredDuringSchedulingIgnoredDuringExecution = requiredDuringSchedulingIgnoredDuringExecution;
+		}
+		
+	}
+	
+	@JsonInclude(Include.NON_NULL)
+	public static class RequiredDuringSchedulingIgnoredDuringExecutionModel extends Model {
+		
+		private NodeSelectorTermsModel nodeSelectorTerms;
+
+		public NodeSelectorTermsModel getNodeSelectorTerms() {
+			return nodeSelectorTerms;
+		}
+
+		public void setNodeSelectorTerms(NodeSelectorTermsModel nodeSelectorTerms) {
+			this.nodeSelectorTerms = nodeSelectorTerms;
+		}
+		
+	}
+	
+	@JsonInclude(Include.NON_NULL)
+	public static class NodeSelectorTermsModel extends Model {
+		
+		private List<Map<String, Object>> matchExpressions;
+
+		public List<Map<String, Object>> getMatchExpressions() {
+			return matchExpressions;
+		}
+
+		public void setMatchExpressions(List<Map<String, Object>> matchExpressions) {
+			this.matchExpressions = matchExpressions;
+		} 
 		
 	}
 	

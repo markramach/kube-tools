@@ -3,13 +3,18 @@
  */
 package com.flyover.kube.tools.connector;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel;
+import com.flyover.kube.tools.connector.model.PodSpecModel.AffinityModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel.ImagePullSecretModel;
+import com.flyover.kube.tools.connector.model.PodSpecModel.NodeAffinityModel;
+import com.flyover.kube.tools.connector.model.PodSpecModel.NodeSelectorTermsModel;
+import com.flyover.kube.tools.connector.model.PodSpecModel.RequiredDuringSchedulingIgnoredDuringExecutionModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel.SeLinuxOptions;
 import com.flyover.kube.tools.connector.model.PodSpecModel.SecurityContextModel;
 
@@ -138,10 +143,22 @@ public class PodSpec {
 		
 	}
 	
+	public PodSpec hostname(String hostname) {
+		
+		this.model.setHostname(hostname);
+		
+		return this;
+		
+	}
+	
 	public static class Builders {
 
 		public static Container container(String name) {
 			return new Container(new ContainerModel()).name(name);
+		}
+		
+		public static Match match(String label) {
+			return new Match(label);
 		}
 		
 	}
@@ -170,5 +187,126 @@ public class PodSpec {
 		}
 		
 	}
+
+	public Affinity affinity() {
+		
+		if(this.model.getAffinity() == null) {
+			this.model.setAffinity(new AffinityModel());
+		}
+		
+		return new Affinity(this.model.getAffinity());
+		
+	}
 	
+	public static class Affinity {
+		
+		private AffinityModel model;
+
+		public Affinity(AffinityModel model) {
+			this.model = model;
+		}
+
+		public NodeAffinity nodeAffinity() {
+
+			if(this.model.getNodeAffinity() == null) {
+				this.model.setNodeAffinity(new NodeAffinityModel());
+			}
+			
+			return new NodeAffinity(this.model.getNodeAffinity());
+			
+		}
+		
+	}
+	
+	public static class NodeAffinity {
+		
+		private NodeAffinityModel model;
+
+		public NodeAffinity(NodeAffinityModel model) {
+			this.model = model;
+		}
+		
+		public NodeAffinityRequired required() {
+			
+			if(this.model.getRequiredDuringSchedulingIgnoredDuringExecution() == null) {
+				this.model.setRequiredDuringSchedulingIgnoredDuringExecution(new RequiredDuringSchedulingIgnoredDuringExecutionModel());
+			}
+			
+			return new NodeAffinityRequired(this.model.getRequiredDuringSchedulingIgnoredDuringExecution());
+			
+		}
+		
+	}
+	
+	public static class NodeAffinityRequired {
+		
+		private RequiredDuringSchedulingIgnoredDuringExecutionModel model;
+
+		public NodeAffinityRequired(RequiredDuringSchedulingIgnoredDuringExecutionModel model) {
+			this.model = model;
+		}
+
+		public void nodeSelectorTerms(Match matchExpression) {
+			
+			if(this.model.getNodeSelectorTerms() == null) {
+				this.model.setNodeSelectorTerms(new NodeSelectorTermsModel());
+			}
+			
+			this.model.getNodeSelectorTerms().getMatchExpressions().add(matchExpression.build());
+			
+		}
+		
+	}
+	
+	public static class Match {
+		
+		private String label;
+		private MatchOperator operator;
+		private List<String> values;
+
+		public Match(String label) {
+			this.label = label;
+		}
+		
+		public Match in(List<String> values) {
+			
+			this.operator = MatchOperator.IN;
+			this.values = values;
+			
+			return this;
+			
+		}
+		
+		public Map<String, Object> build() {
+
+			Map<String, Object> exp = new LinkedHashMap<>();
+			exp.put("key", this.label);
+			exp.put("operator", this.operator.code());
+			
+			if(this.values != null) {
+				exp.put("values", this.values);
+			}
+			
+			return exp;
+			
+		}
+		
+	}
+	
+	public static enum MatchOperator {
+		
+		IN("In");
+		
+		private String code;
+
+		private MatchOperator(String code) {
+			this.code = code;
+		}
+
+		public String code() {
+			return code;
+		}
+		
+	}
+
 }
