@@ -6,19 +6,30 @@
 	<parent>
 		<groupId>com.flyover</groupId>
 		<artifactId>kube-tools</artifactId>
-		<version>0.0.5-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
-	<artifactId>docker-connector-examples</artifactId>
-	<name>docker-connector-examples</name>
+	<artifactId>kube-connector-examples</artifactId>
+	<name>kube-connector-examples</name>
 	<url>http://maven.apache.org</url>
 	<properties>
+		<okhttp-version>3.6.0</okhttp-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>docker-connector</artifactId>
+			<artifactId>kube-connector</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${okhttp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${okhttp-version}</version>
 		</dependency>
 	</dependencies>
 </project>

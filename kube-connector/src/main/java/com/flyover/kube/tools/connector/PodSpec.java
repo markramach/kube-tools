@@ -248,11 +248,10 @@ public class PodSpec {
 
 		public void nodeSelectorTerms(Match matchExpression) {
 			
-			if(this.model.getNodeSelectorTerms() == null) {
-				this.model.setNodeSelectorTerms(new NodeSelectorTermsModel());
-			}
+			NodeSelectorTermsModel term = new NodeSelectorTermsModel();
+			term.getMatchExpressions().add(matchExpression.build());
 			
-			this.model.getNodeSelectorTerms().getMatchExpressions().add(matchExpression.build());
+			this.model.getNodeSelectorTerms().add(term);
 			
 		}
 		

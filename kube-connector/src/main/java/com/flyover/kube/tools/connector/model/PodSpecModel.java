@@ -213,16 +213,16 @@ public class PodSpecModel extends Model {
 	@JsonInclude(Include.NON_NULL)
 	public static class RequiredDuringSchedulingIgnoredDuringExecutionModel extends Model {
 		
-		private NodeSelectorTermsModel nodeSelectorTerms;
+		private List<NodeSelectorTermsModel> nodeSelectorTerms = new LinkedList<>();
 
-		public NodeSelectorTermsModel getNodeSelectorTerms() {
+		public List<NodeSelectorTermsModel> getNodeSelectorTerms() {
 			return nodeSelectorTerms;
 		}
 
-		public void setNodeSelectorTerms(NodeSelectorTermsModel nodeSelectorTerms) {
+		public void setNodeSelectorTerms(List<NodeSelectorTermsModel> nodeSelectorTerms) {
 			this.nodeSelectorTerms = nodeSelectorTerms;
 		}
-		
+
 	}
 	
 	@JsonInclude(Include.NON_NULL)

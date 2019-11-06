@@ -6,11 +6,10 @@
 	<parent>
 		<groupId>com.flyover</groupId>
 		<artifactId>kube-tools</artifactId>
-		<version>0.0.5-SNAPSHOT</version>
+		<version>0.0.4-SNAPSHOT</version>
 	</parent>
-	<artifactId>kube-operator-mariadb-companion</artifactId>
-	<name>kube-operator-mariadb-companion</name>
-	<url>http://maven.apache.org</url>
+	<artifactId>kube-operator-mariadb</artifactId>
+	<name>kube-operator-mariadb</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<registryUrl>https://portr.ctnr.ctl.io/v2/</registryUrl>
@@ -47,14 +46,6 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>kube-connector</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
