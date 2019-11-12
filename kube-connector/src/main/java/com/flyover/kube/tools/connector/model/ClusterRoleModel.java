@@ -82,8 +82,17 @@ public class ClusterRoleModel extends KubeModel {
         private List<String> resourceNames = new LinkedList<>();
         private List<String> resources = new LinkedList<>();
         private List<String> verbs = new LinkedList<>();
+        private List<String> nonResourceURLs = new LinkedList<>();
 
-        public List<String> getApiGroups() {
+        public List<String> getNonResourceURLs() {
+			return nonResourceURLs;
+		}
+
+		public void setNonResourceURLs(List<String> nonResourceURLs) {
+			this.nonResourceURLs = nonResourceURLs;
+		}
+
+		public List<String> getApiGroups() {
             return apiGroups;
         }
 

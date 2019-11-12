@@ -88,6 +88,14 @@ public class PodSpec {
 		
 	}
 	
+	public PodSpec priorityClassName(String priorityClassName) {
+		
+		this.model.setPriorityClassName(priorityClassName);
+		
+		return this;
+		
+	}
+	
 	public PodSpec dnsPolicy(String policy) {
 		
 		this.model.setDnsPolicy(policy);

@@ -31,6 +31,8 @@ public class PodSpecModel extends Model {
 	private SecurityContextModel securityContext;
 	@JsonInclude(Include.NON_NULL)
 	private String hostname;
+	@JsonInclude(Include.NON_NULL)
+	private String priorityClassName;
 
 	public List<ContainerModel> getContainers() {
 		return containers;
@@ -126,6 +128,14 @@ public class PodSpecModel extends Model {
 
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
+	}
+
+	public String getPriorityClassName() {
+		return priorityClassName;
+	}
+
+	public void setPriorityClassName(String priorityClassName) {
+		this.priorityClassName = priorityClassName;
 	}
 
 	public static class ImagePullSecretModel extends Model {

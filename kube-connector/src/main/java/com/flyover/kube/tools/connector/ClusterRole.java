@@ -71,6 +71,17 @@ public class ClusterRole {
         return this;
     }
     
+    public ClusterRole nonResourceRule(List<String> nonResourceURLs, List<String> verbs) {
+
+        RuleModel rule = new RuleModel();
+        rule.setNonResourceURLs(nonResourceURLs);
+        rule.setVerbs(verbs);
+
+        this.model.getRules().add(rule);
+
+        return this;
+    }
+    
     public AggregationRule aggregationRule() {
     	
     	if(this.model.getAggregationRule() == null) {
