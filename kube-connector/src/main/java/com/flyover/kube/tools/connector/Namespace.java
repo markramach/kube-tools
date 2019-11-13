@@ -9,9 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.flyover.kube.tools.connector.model.DaemonsetModel;
+import com.flyover.kube.tools.connector.model.DaemonsetV1Model;
 import com.flyover.kube.tools.connector.model.DeploymentModel;
+import com.flyover.kube.tools.connector.model.DeploymentV1Model;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 import com.flyover.kube.tools.connector.model.NamespaceModel;
+import com.flyover.kube.tools.connector.model.VersionModel;
 
 /**
  * @author mramach
@@ -21,6 +25,7 @@ public class Namespace {
 	
 	private Kubernetes kube;
 	private NamespaceModel model;
+	private VersionModel version;
 
 	public Namespace(Kubernetes kube) {
 		this.kube = kube;
@@ -73,7 +78,14 @@ public class Namespace {
 
 	public Deployment deployment(String name, String image, int port) {
 		
-		Deployment d = new Deployment(kube);
+		Deployment d = null;
+		
+		if(Integer.parseInt(version().getMinor()) >= 16) {
+			d = new Deployment(kube, new DeploymentV1Model());
+		} else  {
+			d = new Deployment(kube, new DeploymentModel());
+		}
+		
 		d.metadata().setNamespace(this.model.getMetadata().getName());
 		d.metadata().setName(name);
 		d.spec().replicas(1);
@@ -87,7 +99,14 @@ public class Namespace {
 
 	public Deployment deployment(String name) {
 		
-		Deployment d = new Deployment(kube);
+		Deployment d = null;
+		
+		if(Integer.parseInt(version().getMinor()) >= 16) {
+			d = new Deployment(kube, new DeploymentV1Model());
+		} else  {
+			d = new Deployment(kube, new DeploymentModel());
+		}
+		
 		d.metadata().setNamespace(this.model.getMetadata().getName());
 		d.metadata().setName(name);
 		d.spec().replicas(1);
@@ -100,7 +119,14 @@ public class Namespace {
 	
 	public List<Deployment> deployments(Map<String, String> selectors) {
 		
-		DeploymentModel m = new DeploymentModel();
+		DeploymentModel m = null;
+		
+		if(Integer.parseInt(version().getMinor()) >= 16) {
+			m = new DeploymentV1Model();
+		} else  {
+			m = new DeploymentModel();
+		}
+		
 		m.getMetadata().setNamespace(metadata().getName());
 		
 		return kube.list(m, selectors).stream()
@@ -111,13 +137,30 @@ public class Namespace {
 	
 	public Daemonset daemonset(String name) {
 		
-		Daemonset d = new Daemonset(kube);
+		Daemonset d = null;
+		
+		if(Integer.parseInt(version().getMinor()) >= 16) {
+			d = new Daemonset(kube, new DaemonsetV1Model());
+		} else  {
+			d = new Daemonset(kube, new DaemonsetModel());
+		}
+		
 		d.metadata().setNamespace(this.model.getMetadata().getName());
 		d.metadata().setName(name);
 		d.spec().selector().getMatchLabels().put("key", name);
 		d.spec().template().metadata().getLabels().put("key", name);
 		
 		return d;
+		
+	}
+
+	private VersionModel version() {
+		
+		if(version == null) {
+			version = kube.version();
+		}
+		
+		return version;
 		
 	}
 	
