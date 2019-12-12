@@ -18,6 +18,7 @@ import com.flyover.kube.tools.connector.model.DeploymentTemplateModel;
 import com.flyover.kube.tools.connector.model.KubeMetadataModel;
 import com.flyover.kube.tools.connector.model.PodModel;
 import com.flyover.kube.tools.connector.model.SelectorModel;
+import com.flyover.kube.tools.connector.model.StrategyModel;
 
 /**
  * @author mramach
@@ -229,6 +230,10 @@ public class Deployment {
 			this.model.setReplicas(replicas);
 		}
 		
+		public void strategy(StrategyModel strategy) {
+			this.model.setStrategy(strategy);
+		}
+		
 	}
 	
 	public static class DeploymentTemplate {
@@ -255,6 +260,19 @@ public class Deployment {
 		spec().template().metadata().getLabels().put(key, value);
 		
 		return this;
+		
+	}
+	
+	public static class Strategy {
+		
+		public static StrategyModel recreate() {
+			
+			StrategyModel model = new StrategyModel();
+			model.setType("Recreate");
+			
+			return model;
+			
+		}
 		
 	}
 	
