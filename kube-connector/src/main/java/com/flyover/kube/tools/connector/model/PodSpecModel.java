@@ -33,6 +33,7 @@ public class PodSpecModel extends Model {
 	private String hostname;
 	@JsonInclude(Include.NON_NULL)
 	private String priorityClassName;
+	@JsonInclude(Include.NON_NULL)
 	private List<HostAliasModel> hostAliases = new LinkedList<>();
 
 	public List<ContainerModel> getContainers() {
