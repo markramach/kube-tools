@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.flyover.kube.tools.connector.model.ContainerModel;
+import com.flyover.kube.tools.connector.model.HostAliasModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel.AffinityModel;
 import com.flyover.kube.tools.connector.model.PodSpecModel.ImagePullSecretModel;
@@ -157,6 +158,13 @@ public class PodSpec {
 		
 		return this;
 		
+	}
+
+	public PodSpec hostAliases(HostAlias ha) {
+
+		this.model.getHostAliases().add(ha.model());
+
+		return this;
 	}
 	
 	public static class Builders {

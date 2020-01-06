@@ -155,6 +155,20 @@ public class Container {
 		return this;
 		
 	}
+
+	public Container volumeMount(String name, String mountPath, String subPath) {
+
+		VolumeMountModel vm = new VolumeMountModel();
+		vm.setName(name);
+		vm.setMountPath(mountPath);
+		vm.setSubPath(subPath);
+
+		model.getVolumeMounts().add(vm);
+
+		return this;
+
+	}
+
 	
 	public Container env(String name, String key, Secret secret) {
 		
