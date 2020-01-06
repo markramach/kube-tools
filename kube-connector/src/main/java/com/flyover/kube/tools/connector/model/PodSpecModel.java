@@ -33,6 +33,7 @@ public class PodSpecModel extends Model {
 	private String hostname;
 	@JsonInclude(Include.NON_NULL)
 	private String priorityClassName;
+	private List<HostAliasModel> hostAliases = new LinkedList<>();
 
 	public List<ContainerModel> getContainers() {
 		return containers;
@@ -137,6 +138,10 @@ public class PodSpecModel extends Model {
 	public void setPriorityClassName(String priorityClassName) {
 		this.priorityClassName = priorityClassName;
 	}
+
+	public List<HostAliasModel> getHostAliases() { return hostAliases; }
+
+	public void setHostAliases(List<HostAliasModel> hostAliases) { this.hostAliases = hostAliases; }
 
 	public static class ImagePullSecretModel extends Model {
 		

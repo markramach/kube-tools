@@ -11,6 +11,7 @@ public class VolumeMountModel extends Model {
 
 	private String name;
 	private String mountPath;
+	private String subPath;
 	
 	public String getName() {
 		return name;
@@ -27,5 +28,9 @@ public class VolumeMountModel extends Model {
 	public void setMountPath(String mountPath) {
 		this.mountPath = mountPath;
 	}
+
+	public String getSubPath() { return subPath; }
+
+	public void setSubPath(String subPath) { this.subPath = subPath; }
 	
 }
