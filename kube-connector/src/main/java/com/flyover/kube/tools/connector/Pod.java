@@ -56,6 +56,12 @@ public class Pod {
 		
 	}
 	
+	public String execContainer(String container, String...command) {
+		
+		return kube.exec(container, model, command);
+		
+	}
+	
 	public Pod evict() {
 		
 		KubeModel ev = new EvictionModel();

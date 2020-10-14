@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import okhttp3.Request.Builder;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
@@ -46,6 +48,23 @@ public class ServiceAccountKubernetesAuthenticator implements KubernetesAuthenti
 			};
 
 			restTemplate.getInterceptors().add(interceptor);
+			
+		} catch (IOException e) {
+			throw new RuntimeException("failed while attempting to read token", e);
+		}
+		
+	}
+
+	@Override
+	public void configure(Builder builder) {
+		
+		try {
+			
+			Path p = Paths.get(path);
+			
+			String t = IOUtils.toString(new FileInputStream(p.toFile()), "UTF-8");
+			
+			builder.header("Authorization", String.format("Bearer %s", t.trim()));
 			
 		} catch (IOException e) {
 			throw new RuntimeException("failed while attempting to read token", e);

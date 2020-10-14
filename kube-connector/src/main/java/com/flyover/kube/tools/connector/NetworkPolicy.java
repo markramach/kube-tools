@@ -187,8 +187,8 @@ public class NetworkPolicy {
 			return new NamespaceSelector();
 		}
 		
-		public static AllPodsInNamespace allPodsInNamespace() {
-			return new AllPodsInNamespace();
+		public static ToAllPodsInNamespace allPodsInNamespace() {
+			return new ToAllPodsInNamespace();
 		}
 		
 		public static IPBlock ipBlock() {
@@ -291,6 +291,17 @@ public class NetworkPolicy {
     public static interface ToType {
     	
     	Map<String, Object> model();
+    	
+    }
+    
+    public static class ToAllPodsInNamespace implements ToType {
+    	
+		@Override
+		public Map<String, Object> model() {
+			
+			return Collections.singletonMap("podSelector", Collections.emptyMap());
+			
+		}
     	
     }
     

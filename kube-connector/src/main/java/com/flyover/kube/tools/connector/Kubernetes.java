@@ -395,6 +395,96 @@ public class Kubernetes {
 		}
 		
 	}
+	
+	public String exec(String container, PodModel model, String...command) {
+		
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUri(uri(model, resource(model)))
+				.path("/exec");
+		
+		// append commands
+		Arrays.asList(command).forEach(cmd -> builder.queryParam("command", cmd));
+		
+		builder
+			.queryParam("container", container)
+			.queryParam("stderr", "true")
+			.queryParam("stdout", "true");
+		
+		Request.Builder requestBuilder = new Request.Builder()
+			.url(builder.build().toUri().toString())
+			.header("X-Stream-Protocol-Version", "v4.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "v3.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "v2.channel.k8s.io")
+			.header("X-Stream-Protocol-Version", "channel.k8s.io");
+		
+		config.getAuthenticator().configure(requestBuilder);
+		
+		Request request = requestBuilder.build();
+		
+		CompletableFuture<String> promise = new CompletableFuture<>();
+		
+		WebSocketListener listener = new WebSocketListener() {
+			
+			private ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+			@Override
+			public void onMessage(WebSocket webSocket, String text) {
+				
+				try {
+					out.write(text.getBytes());
+				} catch (IOException e) {
+					promise.completeExceptionally(e);
+				}
+				
+			}
+
+			@Override
+			public void onMessage(WebSocket webSocket, ByteString bytes) {
+				try {
+					out.write(bytes.toByteArray());
+				} catch (IOException e) {
+					promise.completeExceptionally(e);
+				}
+			}
+
+			@Override
+			public void onClosing(WebSocket webSocket, int code, String reason) {
+				promise.complete(new String(out.toByteArray()));
+			}
+
+			@Override
+			public void onClosed(WebSocket webSocket, int code, String reason) {
+				promise.complete(new String(out.toByteArray()));
+			}
+
+			@Override
+			public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+				promise.completeExceptionally(t);
+			}
+			
+		};
+		
+		WebSocket socket = null;
+		
+		try {
+			
+			socket = client.newWebSocket(request, listener);
+			
+			return promise.get();
+			
+		} catch (Exception e) {
+			
+			throw new RuntimeException("Failed during exec call.", e);
+			
+		} finally {
+			
+			if(socket != null) {
+				socket.close(1000, null);
+			}
+			
+		}
+		
+	}
 
 	private <T extends KubeModel> URI uri(T model, ResourceRef ref) {
 		
